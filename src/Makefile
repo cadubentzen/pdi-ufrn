@@ -1,7 +1,8 @@
 CXX = g++
-CXXFLAGS = `pkg-config --cflags --libs opencv`
+CXXFLAGS = `pkg-config --cflags --libs opencv` -g
 
 SOURCES = regions.cpp \
+		  swap_regions.cpp \
 		  bubbles.cpp
 OUTPUTS = $(basename $(SOURCES))
 
