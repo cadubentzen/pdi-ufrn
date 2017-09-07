@@ -111,7 +111,7 @@ void showColoredBubbles(Mat& image) {
 int main(int argc, char** argv){
 	Mat image;
 
-  	image = imread("bolhas.png",CV_LOAD_IMAGE_GRAYSCALE);
+  	image = imread("../img/bolhas.png",CV_LOAD_IMAGE_GRAYSCALE);
   	if(!image.data) {
     	cout << "failed to open bolhas.png" << endl;
 		exit(1);
