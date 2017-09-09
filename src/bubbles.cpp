@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstdlib>
-#include <vector>
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -79,7 +78,8 @@ unsigned countBubblesWithHoles(Mat& imagesrc) {
 		unsigned num_pixels_bg_before = countBackgroundPixels(image);
 		Point first_pixel_with_color = firstPixelWithColor(image, i+1);
 
-		unsigned num_pixels_with_color = (unsigned) floodFill(image, first_pixel_with_color, Scalar(0));
+		unsigned num_pixels_with_color = 
+			(unsigned) floodFill(image, first_pixel_with_color, Scalar(0));
 
 		unsigned num_pixels_bg_after = countBackgroundPixels(image);
 
