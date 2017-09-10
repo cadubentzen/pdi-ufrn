@@ -6,12 +6,6 @@ These exercises are based on the OpenCV tutorial provided by professor Agostinho
 
 OpenCV 2.4 has been used in this material.
 
-### Makefile
-
-```make
-{{src/Makefile}}
-```
-
 ### Negative of a region
 
 ```c++
@@ -32,13 +26,18 @@ OpenCV 2.4 has been used in this material.
 
 ### Histogram equalization
 
-```
+```c++
 {{src/equalize.cpp}}
 ```
 
 ### Motion detection
 
-```
+```c++
 {{src/motiondetector.cpp}}
 ```
 
+### Laplacian of Gaussian
+
+```c++
+{{src/laplgauss.cpp}}
+```

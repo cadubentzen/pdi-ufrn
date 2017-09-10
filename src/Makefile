@@ -3,9 +3,10 @@ CXXFLAGS = `pkg-config --cflags --libs opencv` -g
 
 SOURCES = regions.cpp \
 		  swap_regions.cpp \
+		  bubbles.cpp \
 		  equalize.cpp \
 		  motiondetector.cpp \
-		  bubbles.cpp
+		  laplgauss.cpp
 
 OUTPUTS = $(basename $(SOURCES))
 
