@@ -5,113 +5,33 @@
 using namespace cv;
 using namespace std;
 
-void removeBubblesInBoundaries(Mat& image) {
-	Size imgSize = image.size();
-
-	// Loop through first and last line
-	for(int i = 0; i < imgSize.width; ++i) {
-		// First line
-		if (image.at<uchar>(0, i) == 255) {
-			floodFill(image, Point(i, 0), Scalar(0));
-		}
-		// Last line
-		if (image.at<uchar>(imgSize.height-1, i) == 255) {
-			floodFill(image, Point(i, imgSize.height-1), Scalar(0));
-		}
+inline void incrementColor(Vec3b &color) {
+	if (color[2] < 255) {
+		color[2]++;
+	} else if (color[1] < 255) {
+		color[1]++;
+		color[2] = 0;
+	} else if (color[0] < 50) {
+		color[0]++;
+		color[1] = 0;
+		color[2] = 0;
+	} else {
+		cout << "Max of bubbles for this algorithm is 3276799." << endl;
+		exit(1);
 	}
-
-	// Loop through first and last column
-	for(int i = 0; i < imgSize.height; ++i) {
-		// First column
-		if (image.at<uchar>(i, 0) == 255) {
-			floodFill(image, Point(0, i), Scalar(0));
-		}
-		// Last column
-		if (image.at<uchar>(i, imgSize.width-1) == 255) {
-			floodFill(image, Point(imgSize.width-1, i), Scalar(0));
-		}
-	}	
-}
-
-unsigned countBubbles(Mat& image) {
-	Size imgSize = image.size();
-	unsigned num_bubbles = 0;
-
-	for (int i = 0; i < imgSize.height; ++i) {
-		for (int j = 0; j < imgSize.width; ++j) {
-			if (image.at<uchar>(i, j) == 255) {
-				floodFill(image, Point(j, i), Scalar(++num_bubbles));
-				if (num_bubbles > 255) {
-					cerr << "Maximum of bubbles is 255 for this algorithm" << endl; 
-					exit(1);
-				}
-			}
-		}
-	}
-
-	return num_bubbles;
-}
-
-unsigned countBackgroundPixels(Mat &image) {
-	return (unsigned) floodFill(image, Point(0, 0), Scalar(0));
-}
-
-Point firstPixelWithColor(Mat& image, uchar color) {
-	Size imgSize = image.size();
-	for (int i = 0; i < imgSize.height; ++i) {
-		for (int j = 0; j < imgSize.width; ++j) {
-			if (image.at<uchar>(i, j) == color) return Point(j, i);
-		}
-	}
-	cerr << "No pixel with this color found!" << endl;
-	exit(1);
-}
-
-unsigned countBubblesWithHoles(Mat& imagesrc) {
-	unsigned num_bubbles = countBubbles(imagesrc);
-	unsigned num_bubbles_with_holes = 0;
-	Mat image = imagesrc.clone();
-
-	cout << "Number of bubbles: " << num_bubbles << endl;
-
-	for (int i = 0; i < num_bubbles; ++i) {
-		unsigned num_pixels_bg_before = countBackgroundPixels(image);
-		Point first_pixel_with_color = firstPixelWithColor(image, i+1);
-
-		unsigned num_pixels_with_color = 
-			(unsigned) floodFill(image, first_pixel_with_color, Scalar(0));
-
-		unsigned num_pixels_bg_after = countBackgroundPixels(image);
-
-		if (num_pixels_bg_after > num_pixels_bg_before + num_pixels_with_color) 
-			num_bubbles_with_holes++;
-	}
-
-	return num_bubbles_with_holes;
-}
-
-void showColoredBubbles(Mat& image) {
-	Mat colored_image;
-	Size imgSize = image.size();
-	cvtColor(image, colored_image, CV_GRAY2BGR);
-
-	for (int i = 0; i < imgSize.height; ++i) {
-		for (int j = 0; j < imgSize.width; ++j) {
-			if (image.at<uchar>(i, j) != 0) {
-				floodFill(colored_image, Point(j, i), 
-					      Scalar(rand()%256, rand()%256, rand()%256) );
-			}
-		}
-	}
-
-	namedWindow("colored");
-	imshow("colored", colored_image);
 }
 
 int main(int argc, char** argv){
+	if (argc != 2) {
+		cout << "usage:" << argv[0] << " <bubbles_image>" << endl
+			 << "\t where <bubbles_image> should be a black "
+			 << "and white image of bubbles" << endl;
+		exit(1);
+	}
+
 	Mat image;
 
-  	image = imread("../img/bolhas.png",CV_LOAD_IMAGE_GRAYSCALE);
+  	image = imread(argv[1]);
   	if(!image.data) {
     	cout << "failed to open bolhas.png" << endl;
 		exit(1);
@@ -120,12 +40,108 @@ int main(int argc, char** argv){
   	namedWindow("Original", WINDOW_AUTOSIZE);
   	imshow("Original", image);
 
-	removeBubblesInBoundaries(image);
+	Size imgSize = image.size();
+	Vec3b white;
+	white[0] = 255; white[1] = 255; white[2] = 255;
 
-	unsigned num_bubbles_with_holes = countBubblesWithHoles(image);
-	cout << "Number of bubbles with holes: " << num_bubbles_with_holes << endl;
+	// First remove the bubbles in boundaries
 
-	showColoredBubbles(image);
+	// Loop through first and last line
+	for(int i = 0; i < imgSize.width; ++i) {
+		// First line
+		if (image.at<Vec3b>(0, i) == white) {
+			floodFill(image, Point(i, 0), Scalar(0, 0, 0));
+		}
+		// Last line
+		if (image.at<Vec3b>(imgSize.height-1, i) == white) {
+			floodFill(image, Point(i, imgSize.height-1), Scalar(0, 0, 0));
+		}
+	}
+
+	// Loop through first and last column
+	for(int i = 0; i < imgSize.height; ++i) {
+		// First column
+		if (image.at<Vec3b>(i, 0) == white) {
+			floodFill(image, Point(0, i), Scalar(0, 0, 0));
+		}
+		// Last column
+		if (image.at<Vec3b>(i, imgSize.width-1) == white) {
+			floodFill(image, Point(imgSize.width-1, i), Scalar(0, 0, 0));
+		}
+	}
+
+	namedWindow("noBoundaries", WINDOW_AUTOSIZE);
+	imshow("noBoundaries", image);	
+	
+	// Then first count bubbles with holes or not
+	unsigned num_bubbles = 0;
+	// Initial count color is [0,0,1]
+	Vec3b color;
+	color[0] = 0; color[1] = 0; color[2] = 1;
+
+	for (int i = 0; i < imgSize.height; ++i) {
+		for (int j = 0; j < imgSize.width; ++j) {
+			if (image.at<Vec3b>(i, j) == white) {
+				floodFill(image, Point(j, i), 
+						  Scalar(color[0], color[1], color[2]));
+				num_bubbles++;
+				incrementColor(color);
+			}
+		}
+	}
+
+	cout << "Number of bubbles = " << num_bubbles << endl;
+
+	// Now count bubbles with holes
+	
+	unsigned num_bubbles_with_holes = 0;
+	Mat image_aux = image.clone();
+
+	color[0] = 0; color[1] = 0; color[2] = 1;
+
+	for (int i = 0; i < num_bubbles; ++i) {
+		unsigned num_pixels_bg_before = 
+			floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+		
+		Point first_pixel_with_color (0, 0);
+
+		for (int i2 = 0; i2 < imgSize.height; ++i2) {
+			for (int j = 0; j < imgSize.width; ++j) {
+				if (image_aux.at<Vec3b>(i2, j) == color) {
+					first_pixel_with_color = Point(j, i2);
+					break;
+				}
+			}
+		}
+		if (first_pixel_with_color.x == 0 &&
+			first_pixel_with_color.y == 0) {
+			cerr << "No pixel with this color found. Review algorithm." << endl;
+			exit(1);
+		}
+
+		unsigned num_pixels_with_color = 
+			floodFill(image_aux, first_pixel_with_color, 
+								 Scalar(0, 0, 0));
+
+		unsigned num_pixels_bg_after = 
+			floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+
+		if (num_pixels_bg_after > num_pixels_bg_before + num_pixels_with_color) {
+			num_bubbles_with_holes++;
+			floodFill(image, first_pixel_with_color,
+					  Scalar(255, 0, 0));
+		} else {
+			floodFill(image, first_pixel_with_color,
+					  Scalar(rand()%51, rand()%256, rand()%256));
+		}
+
+		incrementColor(color);
+	}
+
+	namedWindow("colored", WINDOW_AUTOSIZE);
+	imshow("colored", image);
+
+	cout << "Number of bubbles with holes = " << num_bubbles_with_holes << endl;
 
   	waitKey();
   	

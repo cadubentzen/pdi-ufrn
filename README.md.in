@@ -27,12 +27,33 @@ This example consists of swapping the four regions of a picture, given a order p
 
 ![Lenna swapped](results/result_swap.png "Lenna swapped")
 
+#### swap\_regions.cpp
 ```c++
 {{src/swap_regions.cpp}}
 ```
 
 ### Counting bubbles with holes
 
+This example makes use of `floodFill`, which consists of painting an area that has the same color, replacing it by another color. Here this technique is used for counting and labeling bubbles in a black and white picture. Besides that, in this algorithm, bubbles with holes are counted too.
+
+Original image                                   | 
+:-----------------------------------------------:|
+![Original](results/result_bubbles_original.png) |
+
+No boundaries                                              | 
+:---------------------------------------------------------:|
+![No boundaries](results/result_bubbles_noboundaries.png)  |
+
+Labeled                                         |
+:----------------------------------------------:|
+![Labeled](results/result_bubbles_colored.png)  |
+
+
+To run the program: `./bubbles <bubbles_img>`. An example is illustrated above with an example as input. First we remove the bubbles that are in the boundaries because we can't know for sure that they have holes or not (in case this picture was taken from real objects), then we paint the bubbles and bubbles with holes are paint as blue (in RGB: 0, 0, 255).
+
+One important aspect of the algorith below is that it runs on a BGR image, not greyscale. This is done to overcome the problem of having a limit of 255 bubbles on counting if the same thing was done in greyscale. In this implementation I allowed from BGR = (0,0,1) up until BGR = (50,255,255) for labeling. This way it is possible to count up to 3276799 bubbles. The blue channel was limited to 50 for allowing bubbles with holes to be painted full blue BGR = (255,0,0) and be distinguished from the others.
+
+#### bubbles.cpp
 ```c++
 {{src/bubbles.cpp}}
 ```
