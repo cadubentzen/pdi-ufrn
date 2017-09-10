@@ -43,3 +43,9 @@ OpenCV 2.4 has been used in this material.
 ```c++
 {{src/laplgauss.cpp}}
 ```
+
+### Tilt Shift
+
+```c++
+{{src/tiltshift.cpp}}
+```

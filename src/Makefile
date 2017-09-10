@@ -6,7 +6,8 @@ SOURCES = regions.cpp \
 		  bubbles.cpp \
 		  equalize.cpp \
 		  motiondetector.cpp \
-		  laplgauss.cpp
+		  laplgauss.cpp \
+		  tiltshift.cpp
 
 OUTPUTS = $(basename $(SOURCES))
 
