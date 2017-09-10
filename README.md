@@ -400,6 +400,12 @@ int main(int argc, char** argv){
 
 ### Motion detection
 
+Motion detection can also be achieved through the use of histograms. In this example, the average intensities of consecutive histograms are compared in order to determine if there was some movement in the camera stream.
+
+![Motion detection](results/result_motion.gif)
+
+This program can be run by `./motiondetector <threshold>`, where `<threshold>` is the relative difference to consider a moviment (value from 0 to 100).
+
 ```c++
 #include <iostream>
 #include <cstdlib>
