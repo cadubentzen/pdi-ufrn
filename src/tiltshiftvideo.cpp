@@ -14,6 +14,8 @@ Mat func_image, compl_image;
 Mat m_image, m_bimage;
 Mat result;
 
+int num_frame = 1;
+
 void drawFuncImage() {
 	uchar pixel_value;
 	double x;
@@ -63,12 +65,14 @@ void composeResult() {
 
 
 int main(int argc, char** argv) {
-	if (argc != 6) {
+	if (argc != 7) {
 		cout << "usage: " << argv[0] << " <video_input> "
 			 << "<video_output> "
-			 << "<start_focus> <decay> <center_focus>" << endl << endl
+			 << "<start_focus> <decay> <center_focus> <num_frame>" << endl << endl
 			 << "\tWhere start_focus, decay and center may be "
-			 << "between 0 and 100." << endl
+			 << "between 0 and 100;" << endl
+			 << "\t<num_frame> is the number of frames in the original to "
+			 << "the created. (stop motion effect)"
 			 << "\tAnd the output video must have an extension .avi"
 			 << endl;
 		exit(1);
@@ -81,9 +85,10 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-#define NUM_DISCARD 5
+	num_frame = atoi(argv[6]);
+
 	VideoWriter wri (argv[2], CV_FOURCC('D','I','V','X'), 
-					 cap.get(CV_CAP_PROP_FPS)/NUM_DISCARD,
+					 cap.get(CV_CAP_PROP_FPS)/num_frame,
 					 Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), 
 						  cap.get(CV_CAP_PROP_FRAME_HEIGHT)));
 	
@@ -105,7 +110,7 @@ int main(int argc, char** argv) {
 
 	while(1) {
 		
-		for(int i = 0; i < NUM_DISCARD; ++i) {
+		for(int i = 0; i < num_frame; ++i) {
 			cap >> image;
 			if(image.empty()) exit(0);
 		}

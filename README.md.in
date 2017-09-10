@@ -23,6 +23,10 @@ To invert the color of a pixel, the formula used is `color = 255 - color` in eac
 
 ### Swapping regions
 
+This example consists of swapping the four regions of a picture, given a order passed by command line. For example, running `./swap_regions lenna.png 4 3 2 1` swaps the regions as follows, since the original sequence is `1 2 3 4` (left to right, top to bottom)
+
+![Lenna swapped](results/result_swap.png "Lenna swapped")
+
 ```c++
 {{src/swap_regions.cpp}}
 ```
