@@ -404,7 +404,9 @@ Motion detection can also be achieved through the use of histograms. In this exa
 
 ![Motion detection](results/result_motion.gif)
 
-This program can be run by `./motiondetector <threshold>`, where `<threshold>` is the relative difference to consider a moviment (value from 0 to 100).
+This program can be run by `./motiondetector <threshold>`, where `<threshold>` is the relative difference to consider a moviment (value from 0 to 100). A delay of 1 second is put between each frame, because in case a too short interval was used, the difference between frames would be too little and the algorithm would not detect.
+
+In a surveilance system, the ideal I think would be to compare frames with a background frame (empty scene) in order to determine suspecius activity with a high frame rate.
 
 ```c++
 #include <iostream>
@@ -483,6 +485,30 @@ int main(int argc, char** argv){
 ```
 
 ### Laplacian of Gaussian
+
+Here is a comparation between the application of a Laplacian filter and the Laplacian of Gaussian. In order to obtain the Laplacian of Gaussian, the convolution of the two 3x3 kernels was calculated previously, which results in a 5x5 kernel. For this, a simple multiplication in Python with Scipy helped:
+
+```python
+import numpy as np
+from scipy import signal
+
+gauss = np.array([[1,2,1],[2,4,2],[1,2,1]])
+laplacian = np.array([[0,-1,0],[-1,4,-1],[0,-1,0]])
+
+signal.convolve2d(laplacian, gauss)
+
+# Result:
+# [[ 0, -1, -2, -1,  0],
+#  [-1,  0,  2,  0, -1]
+#  [-2,  2,  8,  2, -2],
+#  [-1,  0,  2,  0, -1]
+#  [ 0, -1, -2, -1,  0]]
+
+```
+
+![Laplacian of Gaussian](results/result_laplgauss.gif)
+
+It is possible to notice that the borders now have a higher intensity, although more noise seems to show up with the Laplacian of Gaussian. It seems that due to the webcam pepper and salt noise, the gaussian filter does not help to cut it off, but rather increase its intensity.
 
 ```c++
 #include <iostream>
