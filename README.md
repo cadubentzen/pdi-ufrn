@@ -1,6 +1,6 @@
 ## Digital Image Processing
 
-**PAGE IN PROGRESS - IMAGES NEED TO BE ADDED YET**
+**PAGE IN PROGRESS - DESCRIPTIONS AND IMAGES NEED TO BE ADDED YET**
 
 This website is a showcase of small projects developed during the course of Digital Image Processing offered by Universidade Federal do Rio Grande do Norte, Department of Computer Engineering.
 
