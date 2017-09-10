@@ -49,3 +49,9 @@ OpenCV 2.4 has been used in this material.
 ```c++
 {{src/tiltshift.cpp}}
 ```
+
+### Video using Tilt Shift
+
+```c++
+{{src/tiltshiftvideo.cpp}}
+```
