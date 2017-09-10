@@ -10,6 +10,13 @@ OpenCV 2.4 has been used in this material.
 
 ### Negative of a region
 
+![Negative Region](results/result_regions.png "Negative region")
+
+This is a typical "getting started" example to OpenCV, because it uses simple pixel manipulation in order to make a negative effect in a region of the given image.
+
+To invert the color of a pixel, the formula used is `color = 255 - color` in each channel. To run this example: `./regions <img_path> <x1> <y1> <x2> <y2>` where x1, y1, x2 and y2 the rectangular area to be turned into negative.
+
+#### regions.cpp
 ```c++
 #include <iostream>
 #include <cstdlib>
