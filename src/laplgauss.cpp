@@ -70,7 +70,8 @@ int main(int argvc, char** argv){
 	cout << "width=" << width << "\n";;
 	cout << "height =" << height<< "\n";;
 
-	namedWindow("spatialfilter",1);
+	namedWindow("original", WINDOW_NORMAL);
+	namedWindow("spatialfilter", WINDOW_NORMAL);
 
 	mask = Mat(3, 3, CV_32F, media); 
 	scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);

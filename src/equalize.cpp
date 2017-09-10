@@ -30,6 +30,9 @@ int main(int argc, char** argv){
 		 << "Height  = " << height << endl
 		 << "##############################" << endl;
 
+	namedWindow("grey", WINDOW_NORMAL);
+	namedWindow("equalized", WINDOW_NORMAL);
+
 	while (1) {
 		cap >> image;
 		if(image.empty()) exit(1);

@@ -35,10 +35,10 @@ int main(int argc, char** argv){
 	int cols = image.cols;
 
 	Rect rois[4] = {
-		Rect(         0,          0, rows/2, cols/2),
-		Rect(    rows/2,          0, rows/2, cols/2),
-		Rect(         0,     cols/2, rows/2, cols/2),
-		Rect(    rows/2,     cols/2, rows/2, cols/2)
+		Rect(     0,      0, rows/2, cols/2),
+		Rect(rows/2,      0, rows/2, cols/2),
+		Rect(     0, cols/2, rows/2, cols/2),
+		Rect(rows/2, cols/2, rows/2, cols/2)
 	};
 
 	namedWindow(argv[1],WINDOW_AUTOSIZE);

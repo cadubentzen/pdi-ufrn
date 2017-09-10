@@ -8,10 +8,6 @@ using namespace std;
 #define CHECK_VALID_RANGE(x, dimension) if(x < 0 || x >= dimension) \
 	{cout << "Invalid value for "#x << endl; exit(1);}
 
-void checkValidRange(int x, int dimension) {
-	if (x < 0 || x >= dimension) exit(1);
-}
-
 int main(int argc, char** argv){
 	if (argc != 2 && argc != 6) {
 		cout << "usage: " << endl

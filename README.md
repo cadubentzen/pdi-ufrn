@@ -1,5 +1,7 @@
 ## Digital Image Processing
 
+**PAGE IN PROGRESS - IMAGES NEED TO BE ADDED YET**
+
 This website is a showcase of small projects developed during the course of Digital Image Processing offered by Universidade Federal do Rio Grande do Norte, Department of Computer Engineering.
 
 These exercises are based on the OpenCV tutorial provided by professor Agostinho Brito Jr (http://agostinhobritojr.github.io/tutoriais/pdi/). 
@@ -18,10 +20,6 @@ using namespace std;
 
 #define CHECK_VALID_RANGE(x, dimension) if(x < 0 || x >= dimension) \
 	{cout << "Invalid value for "#x << endl; exit(1);}
-
-void checkValidRange(int x, int dimension) {
-	if (x < 0 || x >= dimension) exit(1);
-}
 
 int main(int argc, char** argv){
 	if (argc != 2 && argc != 6) {
@@ -112,10 +110,10 @@ int main(int argc, char** argv){
 	int cols = image.cols;
 
 	Rect rois[4] = {
-		Rect(         0,          0, rows/2, cols/2),
-		Rect(    rows/2,          0, rows/2, cols/2),
-		Rect(         0,     cols/2, rows/2, cols/2),
-		Rect(    rows/2,     cols/2, rows/2, cols/2)
+		Rect(     0,      0, rows/2, cols/2),
+		Rect(rows/2,      0, rows/2, cols/2),
+		Rect(     0, cols/2, rows/2, cols/2),
+		Rect(rows/2, cols/2, rows/2, cols/2)
 	};
 
 	namedWindow(argv[1],WINDOW_AUTOSIZE);
@@ -309,6 +307,9 @@ int main(int argc, char** argv){
 		 << "Height  = " << height << endl
 		 << "##############################" << endl;
 
+	namedWindow("grey", WINDOW_NORMAL);
+	namedWindow("equalized", WINDOW_NORMAL);
+
 	while (1) {
 		cap >> image;
 		if(image.empty()) exit(1);
@@ -390,6 +391,8 @@ int main(int argc, char** argv){
 		 << "Width = " << width << endl
 		 << "Height  = " << height << endl
 		 << "##############################" << endl;
+
+	namedWindow("grey", WINDOW_NORMAL);
 
 	while (1) {
 		cap >> image;
@@ -496,7 +499,8 @@ int main(int argvc, char** argv){
 	cout << "width=" << width << "\n";;
 	cout << "height =" << height<< "\n";;
 
-	namedWindow("spatialfilter",1);
+	namedWindow("original", WINDOW_NORMAL);
+	namedWindow("spatialfilter", WINDOW_NORMAL);
 
 	mask = Mat(3, 3, CV_32F, media); 
 	scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
