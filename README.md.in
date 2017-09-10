@@ -1,0 +1,44 @@
+## Digital Image Processing
+
+This website is a showcase of small projects developed during the course of Digital Image Processing offered by Universidade Federal do Rio Grande do Norte, Department of Computer Engineering.
+
+These exercises are based on the OpenCV tutorial provided by professor Agostinho Brito Jr (http://agostinhobritojr.github.io/tutoriais/pdi/). 
+
+OpenCV 2.4 has been used in this material.
+
+### Makefile
+
+```make
+{{src/Makefile}}
+```
+
+### Negative of a region
+
+```c++
+{{src/regions.cpp}}
+```
+
+### Swapping regions
+
+```c++
+{{src/swap_regions.cpp}}
+```
+
+### Counting bubbles with holes
+
+```c++
+{{src/bubbles.cpp}}
+```
+
+### Histogram equalization
+
+```
+{{src/equalize.cpp}}
+```
+
+### Motion detection
+
+```
+{{src/motiondetector.cpp}}
+```
+
