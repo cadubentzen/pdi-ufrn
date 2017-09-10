@@ -322,6 +322,10 @@ int main(int argc, char** argv){
 
 ### Histogram equalization
 
+Here the histogram equalization algorithm is used with the normalized accumulated histogram to update the pixels intensity. With this algorithm, the pixel with highest intensity is going to assume the value of 255 and the others pixel also change accordingly.
+
+![Histogram equalization](results/result_equalize.gif)
+
 ```c++
 #include <iostream>
 #include <cstdlib>

@@ -60,6 +60,10 @@ One important aspect of the algorith below is that it runs on a BGR image, not g
 
 ### Histogram equalization
 
+Here the histogram equalization algorithm is used with the normalized accumulated histogram to update the pixels intensity. With this algorithm, the pixel with highest intensity is going to assume the value of 255 and the others pixel also change accordingly.
+
+![Histogram equalization](results/result_equalize.gif)
+
 ```c++
 {{src/equalize.cpp}}
 ```
