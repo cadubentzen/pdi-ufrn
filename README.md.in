@@ -117,13 +117,15 @@ It is possible to notice that the borders now have a higher intensity, although 
 
 ### Tilt Shift
 
-Tilt shifting consists of blurring the boundaries for selective focus, often producing miniature effect. To achieve this, element-wise multiplication is done with masks of hyperbolic tangents vertically.
+Tilt shifting consists of blurring the boundaries for selective focus, often producing miniature effect. To achieve this, element-wise multiplication is done with masks of hyperbolic tangents vertically. For example,
 
 ![Equation](results/equation_tanh.png)
 
-and two representations of the image: focused and blurred. Afterwards, these two results are added to produce the final image, that has focus on the center and blurred at the boundaries:
+and two representations of the image: focused and blurred. Afterwards, these two results are added to produce the final image, that has focus on the center and blurred at the boundaries.
 
 ![Tilt shift](results/result_tiltshift.gif)
+
+The parameters such start of focus, decay and center of focus are controlled using GUI elements of OpenCV. Changing these values reflect in the equation for the vertical brightness of the masks.
 
 To use this program, run `./tiltshift <img>`.
 
@@ -134,7 +136,9 @@ To use this program, run `./tiltshift <img>`.
 
 ### Video using Tilt Shift
 
-https://youtu.be/iZipXrmZljE
+This is an application of the above example, where every frame of the video is processed using tilt shift and also frames are discarded to create a stop motion effect. An example can be seen in <https://youtu.be/iZipXrmZljE>.
+
+To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
 
 #### tiltshiftvideo.cpp
 ```c++
