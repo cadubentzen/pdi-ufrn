@@ -5,9 +5,10 @@
 using namespace cv;
 using namespace std;
 
-double start_focus = 20;
+double start_focus    = 20;
 double decay_strength = 50;
-double center_focus = 50;
+double center_focus   = 50;
+int    hue_gain       = 20;
 
 Mat image, temp_image, blurred_image;
 Mat func_image, compl_image;
@@ -59,18 +60,31 @@ void composeResult() {
 	Mat result_f;
 
 	addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
-
 	result_f.convertTo(result, CV_8UC3);
+	
+	Mat result_hsv;
+	Mat planes_hsv[3];
+	Mat hue_saturated;
+
+	cvtColor(result, result_hsv, CV_BGR2HSV);
+	split(result_hsv, planes_hsv);
+	planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+	hue_saturated.copyTo(planes_hsv[1]);
+	merge(planes_hsv, 3, result_hsv);
+	
+	cvtColor(result_hsv, result, CV_HSV2BGR);
 }
 
 
 int main(int argc, char** argv) {
-	if (argc != 7) {
+	if (argc != 8) {
 		cout << "usage: " << argv[0] << " <video_input> "
 			 << "<video_output> "
-			 << "<start_focus> <decay> <center_focus> <num_frame>" << endl << endl
+			 << "<start_focus> <decay> <center_focus> " 
+			 << "<hue_gain> <num_frame>" << endl << endl
 			 << "\tWhere start_focus, decay and center may be "
 			 << "between 0 and 100;" << endl
+			 << "<hue_gain> goes between 0 and 255;" << endl
 			 << "\t<num_frame> is the number of frames in the original to "
 			 << "the created. (stop motion effect)"
 			 << "\tAnd the output video must have an extension .avi"
@@ -85,7 +99,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	num_frame = atoi(argv[6]);
+	num_frame = atoi(argv[7]);
 
 	VideoWriter wri (argv[2], CV_FOURCC('D','I','V','X'), 
 					 cap.get(CV_CAP_PROP_FPS)/num_frame,
@@ -98,14 +112,15 @@ int main(int argc, char** argv) {
 	}
 
 
-	start_focus = atof(argv[3]);
+	start_focus    = atof(argv[3]);
 	decay_strength = atof(argv[4]);
-	center_focus = atof(argv[5]);
+	center_focus   = atof(argv[5]);
+	hue_gain       = atoi(argv[6]);
 
 	cap >> image;
 	if(image.empty()) exit(0);
 
-	func_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+	func_image  = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 	compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 
 	while(1) {

@@ -17,6 +17,10 @@ double center_focus = 50;
 int center_focus_slider = 50;
 int center_focus_slider_max = 100;
 
+int hue_gain = 0;
+int hue_gain_slider = 0;
+int hue_gain_slider_max = 255;
+
 Mat image, temp_image, blurred_image;
 Mat func_image, compl_image;
 Mat m_image, m_bimage;
@@ -41,7 +45,6 @@ void drawFuncImage() {
 		}
 	}
 	imshow( "func_image",  func_image);
-	imshow("compl_image", compl_image);
 }
 
 void composeResult() {
@@ -71,6 +74,18 @@ void composeResult() {
 	addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
 
 	result_f.convertTo(result, CV_8UC3);
+
+	Mat result_hsv;
+	Mat planes_hsv[3];
+	Mat hue_saturated;
+
+	cvtColor(result, result_hsv, CV_BGR2HSV);
+	split(result_hsv, planes_hsv);
+	planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+	hue_saturated.copyTo(planes_hsv[1]);
+	merge(planes_hsv, 3, result_hsv);
+	
+	cvtColor(result_hsv, result, CV_HSV2BGR);
 	imshow("result", result);
 }
 
@@ -108,6 +123,11 @@ void on_trackbar_center_focus(int, void*) {
 	composeResult();
 }
 
+void on_trackbar_hue_gain(int, void*) {
+	hue_gain = hue_gain_slider;
+	composeResult();
+}
+
 int main(int argc, char** argv) {
 	if (argc != 2) {
 		cout << "usage: " << argv[0] << " <img1>"
@@ -126,7 +146,6 @@ int main(int argc, char** argv) {
 	compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 
 	namedWindow( "func_image", WINDOW_NORMAL);
-	namedWindow("compl_image", WINDOW_NORMAL);
 	namedWindow(     "result", WINDOW_NORMAL);
 
 	sprintf( TrackbarName, "Start" );
@@ -150,6 +169,14 @@ int main(int argc, char** argv) {
 					center_focus_slider_max,
 					on_trackbar_center_focus );
 	on_trackbar_center_focus(center_focus_slider, 0);
+
+	sprintf( TrackbarName, "Hue Gain" );
+	createTrackbar( TrackbarName, "func_image",
+					&hue_gain_slider,
+					hue_gain_slider_max,
+					on_trackbar_hue_gain );
+	on_trackbar_hue_gain(hue_gain_slider, 0);
+
 
 	waitKey(0);
 
