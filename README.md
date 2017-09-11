@@ -658,7 +658,11 @@ int main(int argvc, char** argv){
 
 ### Tilt Shift
 
+Tilt shifting consists of blurring the boundaries for selective focus, often producing miniature effect. To achieve this, element-wise multiplication is done with masks of hyperbolic tangents vertically ($f(x) = (tanh((x-20)/6) - tanh((x-60)/6))/2$ for example) and two representations of the image: focused and blurred. Afterwards, these two results are added to produce the final image, that has focus on the center and blurred at the boundaries:
+
 ![Tilt shift](results/result_tiltshift.gif)
+
+To use this program, run `./tiltshift <img>`.
 
 #### tiltshift.cpp
 ```c++
