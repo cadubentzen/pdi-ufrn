@@ -64,6 +64,7 @@ Here the histogram equalization algorithm is used with the normalized accumulate
 
 ![Histogram equalization](results/result_equalize.gif)
 
+#### equalize.cpp
 ```c++
 {{src/equalize.cpp}}
 ```
@@ -78,6 +79,7 @@ This program can be run by `./motiondetector <threshold>`, where `<threshold>` i
 
 In a surveilance system, the ideal I think would be to compare frames with a background frame (empty scene) in order to determine suspecius activity with a high frame rate.
 
+#### motiondetector.cpp
 ```c++
 {{src/motiondetector.cpp}}
 ```
@@ -108,12 +110,16 @@ signal.convolve2d(laplacian, gauss)
 
 It is possible to notice that the borders now have a higher intensity, although more noise seems to show up with the Laplacian of Gaussian. It seems that due to the webcam pepper and salt noise, the gaussian filter does not help to cut it off, but rather increase its intensity.
 
+#### laplgauss.cpp
 ```c++
 {{src/laplgauss.cpp}}
 ```
 
 ### Tilt Shift
 
+![Tilt shift](results/result_tiltshift.gif)
+
+#### tiltshift.cpp
 ```c++
 {{src/tiltshift.cpp}}
 ```
