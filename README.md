@@ -824,6 +824,9 @@ int main(int argc, char** argv) {
 
 ### Video using Tilt Shift
 
+https://youtu.be/iZipXrmZljE
+
+#### tiltshiftvideo.cpp
 ```c++
 #include <iostream>
 #include <cmath>
