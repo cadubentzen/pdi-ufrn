@@ -689,6 +689,10 @@ double center_focus = 50;
 int center_focus_slider = 50;
 int center_focus_slider_max = 100;
 
+int hue_gain = 0;
+int hue_gain_slider = 0;
+int hue_gain_slider_max = 255;
+
 Mat image, temp_image, blurred_image;
 Mat func_image, compl_image;
 Mat m_image, m_bimage;
@@ -713,7 +717,6 @@ void drawFuncImage() {
         }
     }
     imshow( "func_image",  func_image);
-    imshow("compl_image", compl_image);
 }
 
 void composeResult() {
@@ -743,6 +746,18 @@ void composeResult() {
     addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
 
     result_f.convertTo(result, CV_8UC3);
+
+    Mat result_hsv;
+    Mat planes_hsv[3];
+    Mat hue_saturated;
+
+    cvtColor(result, result_hsv, CV_BGR2HSV);
+    split(result_hsv, planes_hsv);
+    planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+    hue_saturated.copyTo(planes_hsv[1]);
+    merge(planes_hsv, 3, result_hsv);
+    
+    cvtColor(result_hsv, result, CV_HSV2BGR);
     imshow("result", result);
 }
 
@@ -780,6 +795,11 @@ void on_trackbar_center_focus(int, void*) {
     composeResult();
 }
 
+void on_trackbar_hue_gain(int, void*) {
+    hue_gain = hue_gain_slider;
+    composeResult();
+}
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         cout << "usage: " << argv[0] << " <img1>"
@@ -798,7 +818,6 @@ int main(int argc, char** argv) {
     compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 
     namedWindow( "func_image", WINDOW_NORMAL);
-    namedWindow("compl_image", WINDOW_NORMAL);
     namedWindow(     "result", WINDOW_NORMAL);
 
     sprintf( TrackbarName, "Start" );
@@ -823,6 +842,14 @@ int main(int argc, char** argv) {
                     on_trackbar_center_focus );
     on_trackbar_center_focus(center_focus_slider, 0);
 
+    sprintf( TrackbarName, "Hue Gain" );
+    createTrackbar( TrackbarName, "func_image",
+                    &hue_gain_slider,
+                    hue_gain_slider_max,
+                    on_trackbar_hue_gain );
+    on_trackbar_hue_gain(hue_gain_slider, 0);
+
+
     waitKey(0);
 
     exit(0);
@@ -832,9 +859,9 @@ int main(int argc, char** argv) {
 
 ### Video using Tilt Shift
 
-This is an application of the above example, where every frame of the video is processed using tilt shift and also frames are discarded to create a stop motion effect. An example can be seen in <https://youtu.be/iZipXrmZljE>.
+This is an application of the above example, where every frame of the video is processed using tilt shift, hue saturation and also frames are discarded to create a stop motion effect. An example can be seen in <https://youtu.be/Nb5tOemIDl0>.
 
-To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
+To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <hue_offset> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. `<hue_gain>` can be between 0 and 255. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
 
 #### tiltshiftvideo.cpp
 ```c++
@@ -845,9 +872,10 @@ To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus
 using namespace cv;
 using namespace std;
 
-double start_focus = 20;
+double start_focus    = 20;
 double decay_strength = 50;
-double center_focus = 50;
+double center_focus   = 50;
+int    hue_gain       = 20;
 
 Mat image, temp_image, blurred_image;
 Mat func_image, compl_image;
@@ -899,18 +927,31 @@ void composeResult() {
     Mat result_f;
 
     addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
-
     result_f.convertTo(result, CV_8UC3);
+    
+    Mat result_hsv;
+    Mat planes_hsv[3];
+    Mat hue_saturated;
+
+    cvtColor(result, result_hsv, CV_BGR2HSV);
+    split(result_hsv, planes_hsv);
+    planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+    hue_saturated.copyTo(planes_hsv[1]);
+    merge(planes_hsv, 3, result_hsv);
+    
+    cvtColor(result_hsv, result, CV_HSV2BGR);
 }
 
 
 int main(int argc, char** argv) {
-    if (argc != 7) {
+    if (argc != 8) {
         cout << "usage: " << argv[0] << " <video_input> "
              << "<video_output> "
-             << "<start_focus> <decay> <center_focus> <num_frame>" << endl << endl
+             << "<start_focus> <decay> <center_focus> " 
+             << "<hue_gain> <num_frame>" << endl << endl
              << "\tWhere start_focus, decay and center may be "
              << "between 0 and 100;" << endl
+             << "<hue_gain> goes between 0 and 255;" << endl
              << "\t<num_frame> is the number of frames in the original to "
              << "the created. (stop motion effect)"
              << "\tAnd the output video must have an extension .avi"
@@ -925,7 +966,7 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    num_frame = atoi(argv[6]);
+    num_frame = atoi(argv[7]);
 
     VideoWriter wri (argv[2], CV_FOURCC('D','I','V','X'), 
                      cap.get(CV_CAP_PROP_FPS)/num_frame,
@@ -938,14 +979,15 @@ int main(int argc, char** argv) {
     }
 
 
-    start_focus = atof(argv[3]);
+    start_focus    = atof(argv[3]);
     decay_strength = atof(argv[4]);
-    center_focus = atof(argv[5]);
+    center_focus   = atof(argv[5]);
+    hue_gain       = atoi(argv[6]);
 
     cap >> image;
     if(image.empty()) exit(0);
 
-    func_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+    func_image  = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
     compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 
     while(1) {

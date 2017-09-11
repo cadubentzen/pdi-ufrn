@@ -134,9 +134,9 @@ To use this program, run `./tiltshift <img>`.
 
 ### Video using Tilt Shift
 
-This is an application of the above example, where every frame of the video is processed using tilt shift and also frames are discarded to create a stop motion effect. An example can be seen in <https://youtu.be/iZipXrmZljE>.
+This is an application of the above example, where every frame of the video is processed using tilt shift, hue saturation and also frames are discarded to create a stop motion effect. An example can be seen in <https://youtu.be/Nb5tOemIDl0>.
 
-To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
+To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <hue_offset> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. `<hue_gain>` can be between 0 and 255. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
 
 #### tiltshiftvideo.cpp
 ```c++
