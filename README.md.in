@@ -138,6 +138,13 @@ This is an application of the above example, where every frame of the video is p
 
 To run this program: `./tiltshiftvideo <video_input> <video_output> <start_focus> <decay> <center_focus> <hue_offset> <num_frame>`, where `<video_output>` must have .avi extension due to the codec used. `<start_focus>`, `<decay>` and `<center_focus>` can go between 0 a 100. `<hue_gain>` can be between 0 and 255. Every `<num_frame>` one frame is gotten, so if  `<num_frame>` is 1, the video will have the same speed as the original.
 
+To merge audio and video in the output file, I used ffmpeg to extract the track from the original clip and mix with the output video:
+
+```
+$ fmpeg -i china.mp4 -vn -acodec copy audio-china.aac 
+$ ffmpeg -i china_output_hue.avi -i audio-china.aac -codec copy -shortest china_output_hue_audio.avi
+```
+
 #### tiltshiftvideo.cpp
 ```c++
 {{src/tiltshiftvideo.cpp}}
