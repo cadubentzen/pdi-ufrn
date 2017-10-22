@@ -10,12 +10,13 @@ SOURCES = regions.cpp \
 		  tiltshift.cpp \
 		  tiltshiftvideo.cpp
 
-OUTPUTS = $(basename $(SOURCES))
+all: $(addprefix bin/,$(basename $(SOURCES)))
 
-all: $(OUTPUTS)
-
-%: %.cpp
-	$(CXX) $< -o bin/$@ $(CXXFLAGS)
+bin/%: %.cpp bin
+	$(CXX) $< -o $@ $(CXXFLAGS)
 
 clean:
-	-rm -rf bin/*
+	-rm -rf bin
+
+bin:
+	-@mkdir bin
