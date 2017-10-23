@@ -1,5 +1,6 @@
 # Summary
 
+- [Introduction](./introduction.md)
 - [Unit 1](./unit1/list.md)
     - [Negative of a region](./unit1/negative.md)
     - [Swapping regions](./unit1/swapping.md)
