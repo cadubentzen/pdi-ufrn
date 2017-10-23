@@ -149,3 +149,16 @@ $ ffmpeg -i china_output_hue.avi -i audio-china.aac -codec copy -shortest china_
 ```c++
 {{src/tiltshiftvideo.cpp}}
 ```
+
+### Homomorphic filter
+
+Homomorphic filters are filters that operate in the frequency domain, based on the separation of reflectance and illumance and using a modified Gaussian filter for regulating illumination in scene.
+
+The result below shows the application of a homomorphic filter, with source code displayed as well.
+
+![Homomorphic](results/result_result_homomorphic.gif)
+
+#### homomorphic.cpp
+```c++
+{{src/homomorphic.cpp}}
+```
