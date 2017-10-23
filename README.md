@@ -1026,7 +1026,7 @@ Homomorphic filters are filters that operate in the frequency domain, based on t
 
 The result below shows the application of a homomorphic filter, with source code displayed as well.
 
-![Homomorphic](results/result_result_homomorphic.gif)
+![Homomorphic](results/result_homomorphic.gif)
 
 #### homomorphic.cpp
 ```c++
