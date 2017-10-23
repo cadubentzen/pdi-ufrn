@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = `pkg-config --cflags --libs opencv` -g
+CXXFLAGS = `pkg-config --cflags --libs opencv` -std=c++11
 
 SOURCES = regions.cpp \
 		  swap_regions.cpp \
