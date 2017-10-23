@@ -2,18 +2,14 @@
 
 This example makes use of `floodFill`, which consists of painting an area that has the same color, replacing it by another color. Here this technique is used for counting and labeling bubbles in a black and white picture. Besides that, in this algorithm, bubbles with holes are counted too.
 
-Original image                                   | 
-:-----------------------------------------------:|
-![Original](./results/result_bubbles_original.png) |
+#### Original image
+![Original](./results/result_bubbles_original.png)
 
-No boundaries                                              | 
-:---------------------------------------------------------:|
-![No boundaries](./results/result_bubbles_noboundaries.png)  |
+#### No boundaries
+![No boundaries](./results/result_bubbles_noboundaries.png)
 
-Labeled                                         |
-:----------------------------------------------:|
-![Labeled](./results/result_bubbles_colored.png)  |
-
+#### Labeled
+![Labeled](./results/result_bubbles_colored.png)
 
 To run the program: `./bubbles <bubbles_img>`. An example is illustrated above with an example as input. First we remove the bubbles that are in the boundaries because we can't know for sure that they have holes or not (in case this picture was taken from real objects), then we paint the bubbles and bubbles with holes are paint as blue (in RGB: 0, 0, 255).
 
