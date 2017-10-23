@@ -145,8 +145,8 @@ int main(int argc, char** argv) {
 	func_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 	compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
 
-	namedWindow( "func_image", WINDOW_NORMAL);
-	namedWindow(     "result", WINDOW_NORMAL);
+	namedWindow("func_image", WINDOW_NORMAL);
+	namedWindow(    "result", WINDOW_NORMAL);
 
 	sprintf( TrackbarName, "Start" );
 	createTrackbar( TrackbarName, "func_image",
