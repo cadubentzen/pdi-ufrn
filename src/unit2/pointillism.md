@@ -7,6 +7,10 @@ The following result was produced using the algorithm as mentioned above. For ev
 - Some jitter is added to every circle painted, so the circles do not look perfectly aligned (simulating how a human would draw)
 - The circles are not drawn in progressive order. Instead, every iteration the drawing order is shuffled so there is not perfect superposition in any direction.
 
+#### Original image
+![Original image](./img/eolica.jpg)
+
+#### Pointillism image
 ![Result of pointillism with Canny](./results/result_pointillism_canny.png)
 
 #### pointillism_canny.cpp
