@@ -1,0 +1,222 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Motion detection - OpenCV exercises</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html" class="active"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">OpenCV exercises</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./unit1/motion.html#motion-detection" id="motion-detection"><h2>Motion detection</h2></a>
+<p>Motion detection can also be achieved through the use of histograms. In this example, the average intensities of consecutive histograms are compared in order to determine if there was some movement in the camera stream.</p>
+<p><img src="./results/result_motion.gif" alt="Motion detection" /></p>
+<p>This program can be run by <code>./motiondetector &lt;threshold&gt;</code>, where <code>&lt;threshold&gt;</code> is the relative difference to consider a moviment (value from 0 to 100). A delay of 1 second is put between each frame, because in case a too short interval was used, the difference between frames would be too little and the algorithm would not detect.</p>
+<p>In a surveilance system, the ideal I think would be to compare frames with a background frame (empty scene) in order to determine suspecius activity with a high frame rate.</p>
+<a class="header" href="./unit1/motion.html#motiondetectorcpp" id="motiondetectorcpp"><h4>motiondetector.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;thresh_motion&gt;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;Where thresh_motion is a threshold for &quot;
+             &lt;&lt; &quot;relative difference of histograms between 0 and 100.&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    float thresh_motion = atof(argv[1]);
+
+    Mat image, grey;
+    int width, height;
+    VideoCapture cap;
+
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float* histRange = {range};
+    Mat hist;
+
+    float avg = -1, prev_avg = -1;
+
+    cap.open(0);
+
+    if (!cap.isOpened()){
+        cout &lt;&lt; &quot;No cameras available&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    
+    cout &lt;&lt; &quot;###### Image dimensions ######&quot; &lt;&lt; endl    
+         &lt;&lt; &quot;Width = &quot; &lt;&lt; width &lt;&lt; endl
+         &lt;&lt; &quot;Height  = &quot; &lt;&lt; height &lt;&lt; endl
+         &lt;&lt; &quot;##############################&quot; &lt;&lt; endl;
+
+    namedWindow(&quot;grey&quot;, WINDOW_NORMAL);
+
+    while (1) {
+        cap &gt;&gt; image;
+        if(image.empty()) exit(1);
+
+        cvtColor(image, grey, CV_BGR2GRAY);
+
+        calcHist(&amp;grey, 1, 0, Mat(), hist, 1, &amp;histSize, &amp;histRange);
+
+        avg = 0;
+        for (int i = 0; i &lt; 256; ++i) {
+            avg += i * hist.at&lt;float&gt;(i) / ( (float)(width*height) );
+        }
+
+        if (prev_avg &gt; 0 &amp;&amp; // First iteration and not zero for division
+            abs(avg-prev_avg)/prev_avg &gt; thresh_motion/100.0 ) {
+
+            cout &lt;&lt; &quot;Detected movement!!&quot; &lt;&lt; endl;
+        }
+
+        prev_avg = avg;
+    
+        imshow(&quot;grey&quot;, grey);
+        
+        if(waitKey(1000) &gt;= 0) break;
+    }
+    exit(0);
+}
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./unit1/histogram.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./unit1/laplgauss.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./unit1/histogram.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./unit1/laplgauss.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

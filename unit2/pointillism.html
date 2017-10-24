@@ -1,0 +1,281 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Pointillism using Canny filter - OpenCV exercises</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html" class="active"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">OpenCV exercises</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./unit2/pointillism.html#pointillism-using-canny-filter" id="pointillism-using-canny-filter"><h2>Pointillism using Canny filter</h2></a>
+<p>This exercise consists of using Canny filter to produce pontillism images. One could implement a simple pointillism algorithm with circles that have the same size. However, a more interesting painting could be to use Canny filters with varying thresholds in order to draw radius with multiple radius.</p>
+<p>The following result was produced using the algorithm as mentioned above. For every round, the minimum threshold is increased and the circle radius decreases. Also, some randomness helps as well:</p>
+<ul>
+<li>Some jitter is added to every circle painted, so the circles do not look perfectly aligned (simulating how a human would draw)</li>
+<li>The circles are not drawn in progressive order. Instead, every iteration the drawing order is shuffled so there is not perfect superposition in any direction.</li>
+</ul>
+<p><img src="./results/result_pointillism_canny.png" alt="Result of pointillism with Canny" /></p>
+<a class="header" href="./unit2/pointillism.html#pointillism_cannycpp" id="pointillism_cannycpp"><h4>pointillism_canny.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+#include &lt;ctime&gt;
+#include &lt;cstdlib&gt;
+
+using namespace std;
+using namespace cv;
+
+#define JITTER 15
+#define ROUNDS 3
+#define RADIUS 30
+
+vector&lt;int&gt; yrange;
+vector&lt;int&gt; xrange;
+
+int width, height;
+
+void init_ranges(Mat &amp;image, int step) {
+    
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+    
+    width  = image.size().width;
+    height = image.size().height;
+
+    xrange.resize(height/step);
+    yrange.resize(width/step);
+
+    iota(xrange.begin(), xrange.end(), 0); 
+    iota(yrange.begin(), yrange.end(), 0);
+
+    for (auto &amp;i : xrange) {
+        i = (i * step) + (step / 2);
+    }
+
+    for (auto &amp;j : yrange) {
+        j = (j * step) + (step / 2);
+    }
+}
+
+void initial_round(Mat &amp;image, Mat &amp;points, Mat &amp;image_color) {
+    
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+    
+    random_shuffle(xrange.begin(), xrange.end());
+    
+    for(auto i : xrange) {
+        random_shuffle(yrange.begin(), yrange.end());
+        for(auto j : yrange) {
+            int x = i+rand()%(2*JITTER)-JITTER+1;
+            int y = j+rand()%(2*JITTER)-JITTER+1;
+            Vec3b color = image_color.at&lt;Vec3b&gt;(x,y);
+            circle(points,
+                   cv::Point(y,x),
+                   RADIUS,
+                   Scalar(color),
+                   -1,
+                   CV_AA);
+        }
+    }
+}
+
+void draw_circles(Mat &amp;image, Mat &amp;points, Mat &amp;image_color, 
+                  int thresh, int radius) {
+    Mat border;
+
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+
+    Canny(image, border, thresh, 3*thresh);
+
+    random_shuffle(xrange.begin(), xrange.end());
+    
+    for(auto i : xrange) {
+        random_shuffle(yrange.begin(), yrange.end());
+        for(auto j : yrange) {
+            int border_point = border.at&lt;uchar&gt;(i,j);
+            if (border_point == 255) {
+                int x = i+rand()%(2*JITTER)-JITTER+1;
+                int y = j+rand()%(2*JITTER)-JITTER+1;
+                Vec3b color = image_color.at&lt;Vec3b&gt;(x,y);
+                circle(points,
+                       cv::Point(y,x),
+                       radius,
+                       Scalar(color),
+                       -1,
+                       CV_AA);
+            }
+        }
+    }
+} 
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; image.png&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    Mat image, image_color, points;
+
+    image_color = imread(argv[1]);
+
+    cvtColor(image_color, image, CV_BGR2GRAY);
+
+    namedWindow(&quot;pontos&quot;, WINDOW_NORMAL);
+
+    srand(time(0));
+
+    if(!image.data){
+        cout &lt;&lt; &quot;Could not open&quot; &lt;&lt; argv[1] &lt;&lt; endl;
+        exit(1);
+    }
+
+    init_ranges(image, 5);
+
+    points = Mat(height, width, CV_8UC3, 
+                 Scalar(255, 255, 255));
+
+    initial_round(image, points, image_color);
+
+    for (int i = 0, thresh = 20; 
+         i &lt; ROUNDS;
+         ++i, thresh += (100 - 20)/(ROUNDS-1) ) {
+
+        init_ranges(image, ROUNDS-i); 
+        draw_circles(image, points, image_color, 
+                     thresh, 5*(ROUNDS-i));
+    }
+    
+    imshow(&quot;pontos&quot;, points);
+
+    while(1)
+        if(waitKey(10) == 27) break;
+
+    return 0;
+}
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./unit2/homomorphic.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+
+            </div>
+
+            
+                <a href="./unit2/homomorphic.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

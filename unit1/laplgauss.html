@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Laplacian of Gaussian - OpenCV exercises</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html" class="active"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">OpenCV exercises</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./unit1/laplgauss.html#laplacian-of-gaussian" id="laplacian-of-gaussian"><h2>Laplacian of Gaussian</h2></a>
+<p>Here is a comparation between the application of a Laplacian filter and the Laplacian of Gaussian. In order to obtain the Laplacian of Gaussian, the convolution of the two 3x3 kernels was calculated previously, which results in a 5x5 kernel. For this, a simple multiplication in Python with Scipy helped:</p>
+<pre><code class="language-python">import numpy as np
+from scipy import signal
+
+gauss = np.array([[1,2,1],[2,4,2],[1,2,1]])
+laplacian = np.array([[0,-1,0],[-1,4,-1],[0,-1,0]])
+
+signal.convolve2d(laplacian, gauss)
+
+# Result:
+# [[ 0, -1, -2, -1,  0],
+#  [-1,  0,  2,  0, -1]
+#  [-2,  2,  8,  2, -2],
+#  [-1,  0,  2,  0, -1]
+#  [ 0, -1, -2, -1,  0]]
+
+</code></pre>
+<p><img src="./results/result_laplgauss.gif" alt="Laplacian of Gaussian" /></p>
+<p>It is possible to notice that the borders now have a higher intensity, although more noise seems to show up with the Laplacian of Gaussian. It seems that due to the webcam pepper and salt noise, the gaussian filter does not help to cut it off, but rather increase its intensity.</p>
+<a class="header" href="./unit1/laplgauss.html#laplgausscpp" id="laplgausscpp"><h4>laplgauss.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+void printmask(Mat &amp;m){
+    for(int i=0; i&lt;m.size().height; i++){
+        for(int j=0; j&lt;m.size().width; j++){
+            cout &lt;&lt; m.at&lt;float&gt;(i,j) &lt;&lt; &quot;,&quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+void menu(){
+    cout &lt;&lt; &quot;\npress key to activate filter: &quot; &lt;&lt; endl
+         &lt;&lt; &quot;a - absolute value&quot; &lt;&lt; endl
+         &lt;&lt; &quot;m - average&quot; &lt;&lt; endl
+         &lt;&lt; &quot;g - gauss&quot; &lt;&lt; endl
+         &lt;&lt; &quot;v - vertical&quot; &lt;&lt; endl
+         &lt;&lt; &quot;h - horizontal&quot; &lt;&lt; endl
+         &lt;&lt; &quot;l - laplacian&quot; &lt;&lt; endl
+         &lt;&lt; &quot;x - laplacian of gaussian&quot; &lt;&lt; endl
+         &lt;&lt; &quot;esc - exit&quot; &lt;&lt; endl;
+}
+
+int main(int argvc, char** argv){
+    VideoCapture video;
+    float media[] = {1,1,1,
+                     1,1,1,
+                     1,1,1};
+    
+    float gauss[] = {1,2,1,
+                     2,4,2,
+                     1,2,1};
+    
+    float horizontal[]={-1,0,1,
+                        -2,0,2,
+                        -1,0,1};
+    
+    float vertical[]={-1,-2,-1,
+                       0,0,0,
+                       1,2,1};
+    
+    float laplacian[]={0,-1,0,
+                      -1,4,-1,
+                       0,-1,0};
+
+    float laplacian_of_gaussian[] = {0,-1,-2,-1,0,
+                                     -1,0,2,0,-1,
+                                     -2,2,8,2,-2,
+                                     -1,0,2,0,-1,
+                                     0,-1,-2,-1,0};
+
+    Mat cap, frame, frame32f, frameFiltered;
+    Mat mask(3,3,CV_32F), mask1;
+    Mat result, result1;
+    double width, height, min, max;
+    int absolut;
+    char key;
+
+    video.open(0); 
+    if(!video.isOpened()) 
+        return -1;
+
+    width=video.get(CV_CAP_PROP_FRAME_WIDTH);
+    height=video.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    cout &lt;&lt; &quot;width=&quot; &lt;&lt; width &lt;&lt; &quot;\n&quot;;;
+    cout &lt;&lt; &quot;height =&quot; &lt;&lt; height&lt;&lt; &quot;\n&quot;;;
+
+    namedWindow(&quot;original&quot;, WINDOW_NORMAL);
+    namedWindow(&quot;spatialfilter&quot;, WINDOW_NORMAL);
+
+    mask = Mat(3, 3, CV_32F, media); 
+    scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+    swap(mask, mask1);
+    absolut=1; // calcs abs of the image
+
+    menu();
+    for(;;){
+        video &gt;&gt; cap; 
+        cvtColor(cap, frame, CV_BGR2GRAY);
+        flip(frame, frame, 1);
+        imshow(&quot;original&quot;, frame);
+        frame.convertTo(frame32f, CV_32F);
+        filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1,1), 0);
+        if(absolut){
+            frameFiltered=abs(frameFiltered);
+        }
+        frameFiltered.convertTo(result, CV_8U);
+        imshow(&quot;spatialfilter&quot;, result);
+        key = (char) waitKey(10);
+        if( key == 27 ) break; // esc pressed!
+        switch(key){
+            case 'a':
+                menu();
+                absolut=!absolut;
+                break;
+            case 'm':
+                menu();
+                mask = Mat(3, 3, CV_32F, media);
+                scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+                mask = mask1;
+                printmask(mask);
+                break;
+            case 'g':
+                menu();
+                mask = Mat(3, 3, CV_32F, gauss);
+                scaleAdd(mask, 1/16.0, Mat::zeros(3,3,CV_32F), mask1);
+                mask = mask1;
+                printmask(mask);
+                break;
+            case 'h':
+                menu();
+                mask = Mat(3, 3, CV_32F, horizontal);
+                printmask(mask);
+                break;
+            case 'v':
+                menu();
+                mask = Mat(3, 3, CV_32F, vertical);
+                printmask(mask);
+                break;
+            case 'l':
+                menu();
+                mask = Mat(3, 3, CV_32F, laplacian);
+                printmask(mask);
+                break;
+            case 'x':
+                menu();
+                mask = Mat(5, 5, CV_32F, laplacian_of_gaussian);
+                printmask(mask);
+            default:
+                break;
+        }
+    }
+    return 0;
+}
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./unit1/motion.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./unit1/tiltshift.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./unit1/motion.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./unit1/tiltshift.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

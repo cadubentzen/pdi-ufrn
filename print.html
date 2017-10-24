@@ -2,9 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title></title>
+        <title>OpenCV exercises</title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <base href="">
@@ -66,7 +66,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./chapter_1.html"><strong>1.</strong> Chapter 1</a></li></ul>
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -78,7 +78,7 @@
                         <i id="theme-toggle" class="fa fa-paint-brush"></i>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">OpenCV exercises</h1>
 
                     <div class="right-buttons">
                         <a href="print.html">
@@ -88,7 +88,1343 @@
                 </div>
 
                 <div id="content" class="content">
-                    <a class="header" href="print.html#chapter-1" id="chapter-1"><h1>Chapter 1</h1></a>
+                    <a class="header" href="print.html#digital-image-processing" id="digital-image-processing"><h1>Digital Image Processing</h1></a>
+<p>This website is a showcase of small projects developed during the course of Digital Image Processing offered by Universidade Federal do Rio Grande do Norte, Department of Computer Engineering.</p>
+<p>These exercises are based on the OpenCV tutorial provided by professor Agostinho Brito Jr (http://agostinhobritojr.github.io/tutoriais/pdi/).</p>
+<p>OpenCV 2.4 has been used in this material.</p>
+<a class="header" href="print.html#unit-1" id="unit-1"><h1>Unit 1</h1></a>
+<p>In this unit, the following examples were developed:</p>
+<ul>
+<li>Negative of a region</li>
+<li>Swapping regions</li>
+<li>Counting bubbles with holes</li>
+<li>Histogram equalization</li>
+<li>Motion detection</li>
+<li>Laplacian of Gaussian</li>
+<li>Tilt shift</li>
+<li>Tilt shift of a video</li>
+</ul>
+<a class="header" href="print.html#negative-of-a-region" id="negative-of-a-region"><h2>Negative of a region</h2></a>
+<p><img src="./results/result_regions.png" alt="Negative Region" title="Negative region" /></p>
+<p>This is a typical &quot;getting started&quot; example to OpenCV, because it uses simple pixel manipulation in order to make a negative effect in a region of the given image.</p>
+<p>To invert the color of a pixel, the formula used is <code>color = 255 - color</code> in each channel. To run this example: <code>./regions &lt;img_path&gt; &lt;x1&gt; &lt;y1&gt; &lt;x2&gt; &lt;y2&gt;</code> where x1, y1, x2 and y2 the rectangular area to be turned into negative.</p>
+<a class="header" href="print.html#regionscpp" id="regionscpp"><h4>regions.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+#define CHECK_VALID_RANGE(x, dimension) if(x &lt; 0 || x &gt;= dimension) \
+    {cout &lt;&lt; &quot;Invalid value for &quot;#x &lt;&lt; endl; exit(1);}
+
+int main(int argc, char** argv){
+    if (argc != 2 &amp;&amp; argc != 6) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t&quot; &lt;&lt; argv[0] &lt;&lt; &quot;&lt;img_path&gt;&quot; 
+             &lt;&lt; &quot; // To get image dimensions&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t&quot; &lt;&lt; argv[0] &lt;&lt; &quot;&lt;img_path&gt; &lt;x1&gt; &lt;y1&gt; &lt;x2&gt; &lt;y2&gt;&quot; 
+             &lt;&lt; &quot; // To negative the rectangular area&quot; &lt;&lt; endl;
+
+        exit(1);
+    }
+    
+    Mat image = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+    
+    if (!image.data)
+        cout &lt;&lt; &quot;Could not open &quot; &lt;&lt; argv[1] &lt;&lt; endl;
+
+    int cols = image.cols;
+    int rows = image.rows;
+
+    cout &lt;&lt; &quot;###### Image dimensions ######&quot; &lt;&lt; endl
+         &lt;&lt; &quot;Columns: &quot;  &lt;&lt; cols &lt;&lt; endl
+         &lt;&lt; &quot;Rows: &quot;     &lt;&lt; rows &lt;&lt; endl
+         &lt;&lt; &quot;##############################&quot; &lt;&lt; endl;
+
+    if (argc == 2) exit(0);
+
+    int x1 = atoi(argv[2]); CHECK_VALID_RANGE(x1, rows);
+    int y1 = atoi(argv[3]); CHECK_VALID_RANGE(y1, cols);
+    int x2 = atoi(argv[4]); CHECK_VALID_RANGE(x2, rows);
+    int y2 = atoi(argv[5]); CHECK_VALID_RANGE(y2, cols);
+
+    namedWindow(argv[1],WINDOW_AUTOSIZE);
+
+    for (int i = min(x1, x2); i &lt; max(x1, x2); ++i) {
+        for (int j = min(y1, y2); j &lt; max(y1, y2); ++j) {
+            image.at&lt;Vec3b&gt;(i,j)[0] = 255- image.at&lt;Vec3b&gt;(i,j)[0];
+            image.at&lt;Vec3b&gt;(i,j)[1] = 255- image.at&lt;Vec3b&gt;(i,j)[1];
+            image.at&lt;Vec3b&gt;(i,j)[2] = 255- image.at&lt;Vec3b&gt;(i,j)[2];
+        }
+    }
+
+    imshow(argv[1], image);  
+    waitKey();
+
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#swapping-regions" id="swapping-regions"><h2>Swapping regions</h2></a>
+<p>This example consists of swapping the four regions of a picture, given a order passed by command line. For example, running <code>./swap_regions lenna.png 4 3 2 1</code> swaps the regions as follows, since the original sequence is <code>1 2 3 4</code> (left to right, top to bottom)</p>
+<p><img src="./results/result_swap.png" alt="Lenna swapped" title="Lenna swapped" /></p>
+<a class="header" href="print.html#swap_regionscpp" id="swap_regionscpp"><h4>swap_regions.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+#define CHECK_VALID_RANGE(x) if (x &lt; 0 || x &gt; 3) \
+    {cout &lt;&lt; &quot;Invalid region number in sequence&quot; &lt;&lt; endl; exit(1);}
+
+int main(int argc, char** argv){
+    if (argc != 6) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t&quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;img_path&gt; &lt;sequence with 4 numbers from 1 to 4&quot; 
+             &lt;&lt; &quot; separated by spaces&gt;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\tExample: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; ../img/lenna.png 4 3 2 1&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\tThe sequence 1 2 3 4 is the original image, swapping these numbers&quot; 
+             &lt;&lt; &quot; swaps the four regions of the image.&quot; &lt;&lt; endl;
+
+        exit(1);
+    }
+    
+    Mat image = imread(argv[1], CV_LOAD_IMAGE_COLOR);
+    
+    if (!image.data)
+        cout &lt;&lt; &quot;Could not open &quot; &lt;&lt; argv[1] &lt;&lt; endl;
+
+    int sequence[4];
+    for (int i = 0; i &lt; 4; ++i) {
+        sequence[i] = atoi(argv[i+2]) - 1;
+        CHECK_VALID_RANGE(sequence[i]);
+    }
+
+    int rows = image.rows;
+    int cols = image.cols;
+
+    Rect rois[4] = {
+        Rect(     0,      0, rows/2, cols/2),
+        Rect(rows/2,      0, rows/2, cols/2),
+        Rect(     0, cols/2, rows/2, cols/2),
+        Rect(rows/2, cols/2, rows/2, cols/2)
+    };
+
+    namedWindow(argv[1],WINDOW_AUTOSIZE);
+
+    Mat3b swapped (rows, cols, Vec3b(0, 0, 0));
+
+    for (int i = 0; i &lt; 4; ++i) {
+        Mat region (image, rois[ sequence[i] ]);
+        region.copyTo(swapped(rois[i]));
+    }
+
+    imshow(argv[1], swapped);  
+    waitKey();
+
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#counting-bubbles-with-holes" id="counting-bubbles-with-holes"><h2>Counting bubbles with holes</h2></a>
+<p>This example makes use of <code>floodFill</code>, which consists of painting an area that has the same color, replacing it by another color. Here this technique is used for counting and labeling bubbles in a black and white picture. Besides that, in this algorithm, bubbles with holes are counted too.</p>
+<a class="header" href="print.html#original-image" id="original-image"><h4>Original image</h4></a>
+<p><img src="./results/result_bubbles_original.png" alt="Original" /></p>
+<a class="header" href="print.html#no-boundaries" id="no-boundaries"><h4>No boundaries</h4></a>
+<p><img src="./results/result_bubbles_noboundaries.png" alt="No boundaries" /></p>
+<a class="header" href="print.html#labeled" id="labeled"><h4>Labeled</h4></a>
+<p><img src="./results/result_bubbles_colored.png" alt="Labeled" /></p>
+<p>To run the program: <code>./bubbles &lt;bubbles_img&gt;</code>. An example is illustrated above with an example as input. First we remove the bubbles that are in the boundaries because we can't know for sure that they have holes or not (in case this picture was taken from real objects), then we paint the bubbles and bubbles with holes are paint as blue (in RGB: 0, 0, 255).</p>
+<p>One important aspect of the algorith below is that it runs on a BGR image, not greyscale. This is done to overcome the problem of having a limit of 255 bubbles on counting if the same thing was done in greyscale. In this implementation I allowed from BGR = (0,0,1) up until BGR = (50,255,255) for labeling. This way it is possible to count up to 3276799 bubbles. The blue channel was limited to 50 for allowing bubbles with holes to be painted full blue BGR = (255,0,0) and be distinguished from the others.</p>
+<a class="header" href="print.html#bubblescpp" id="bubblescpp"><h4>bubbles.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+inline void incrementColor(Vec3b &amp;color) {
+    if (color[2] &lt; 255) {
+        color[2]++;
+    } else if (color[1] &lt; 255) {
+        color[1]++;
+        color[2] = 0;
+    } else if (color[0] &lt; 50) {
+        color[0]++;
+        color[1] = 0;
+        color[2] = 0;
+    } else {
+        cout &lt;&lt; &quot;Max of bubbles for this algorithm is 3276799.&quot; &lt;&lt; endl;
+        exit(1);
+    }
+}
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage:&quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;bubbles_image&gt;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t where &lt;bubbles_image&gt; should be a black &quot;
+             &lt;&lt; &quot;and white image of bubbles&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    Mat image;
+
+    image = imread(argv[1]);
+    if(!image.data) {
+        cout &lt;&lt; &quot;failed to open bolhas.png&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    namedWindow(&quot;Original&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;Original&quot;, image);
+
+    Size imgSize = image.size();
+    Vec3b white;
+    white[0] = 255; white[1] = 255; white[2] = 255;
+
+    // First remove the bubbles in boundaries
+
+    // Loop through first and last line
+    for(int i = 0; i &lt; imgSize.width; ++i) {
+        // First line
+        if (image.at&lt;Vec3b&gt;(0, i) == white) {
+            floodFill(image, Point(i, 0), Scalar(0, 0, 0));
+        }
+        // Last line
+        if (image.at&lt;Vec3b&gt;(imgSize.height-1, i) == white) {
+            floodFill(image, Point(i, imgSize.height-1), Scalar(0, 0, 0));
+        }
+    }
+
+    // Loop through first and last column
+    for(int i = 0; i &lt; imgSize.height; ++i) {
+        // First column
+        if (image.at&lt;Vec3b&gt;(i, 0) == white) {
+            floodFill(image, Point(0, i), Scalar(0, 0, 0));
+        }
+        // Last column
+        if (image.at&lt;Vec3b&gt;(i, imgSize.width-1) == white) {
+            floodFill(image, Point(imgSize.width-1, i), Scalar(0, 0, 0));
+        }
+    }
+
+    namedWindow(&quot;noBoundaries&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;noBoundaries&quot;, image);  
+    
+    // Then first count bubbles with holes or not
+    unsigned num_bubbles = 0;
+    // Initial count color is [0,0,1]
+    Vec3b color;
+    color[0] = 0; color[1] = 0; color[2] = 1;
+
+    for (int i = 0; i &lt; imgSize.height; ++i) {
+        for (int j = 0; j &lt; imgSize.width; ++j) {
+            if (image.at&lt;Vec3b&gt;(i, j) == white) {
+                floodFill(image, Point(j, i), 
+                          Scalar(color[0], color[1], color[2]));
+                num_bubbles++;
+                incrementColor(color);
+            }
+        }
+    }
+
+    cout &lt;&lt; &quot;Number of bubbles = &quot; &lt;&lt; num_bubbles &lt;&lt; endl;
+
+    // Now count bubbles with holes
+    
+    unsigned num_bubbles_with_holes = 0;
+    Mat image_aux = image.clone();
+
+    color[0] = 0; color[1] = 0; color[2] = 1;
+
+    for (int i = 0; i &lt; num_bubbles; ++i) {
+        unsigned num_pixels_bg_before = 
+            floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+        
+        Point first_pixel_with_color (0, 0);
+
+        for (int i2 = 0; i2 &lt; imgSize.height; ++i2) {
+            for (int j = 0; j &lt; imgSize.width; ++j) {
+                if (image_aux.at&lt;Vec3b&gt;(i2, j) == color) {
+                    first_pixel_with_color = Point(j, i2);
+                    break;
+                }
+            }
+        }
+        if (first_pixel_with_color.x == 0 &amp;&amp;
+            first_pixel_with_color.y == 0) {
+            cerr &lt;&lt; &quot;No pixel with this color found. Review algorithm.&quot; &lt;&lt; endl;
+            exit(1);
+        }
+
+        unsigned num_pixels_with_color = 
+            floodFill(image_aux, first_pixel_with_color, 
+                                 Scalar(0, 0, 0));
+
+        unsigned num_pixels_bg_after = 
+            floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+
+        if (num_pixels_bg_after &gt; num_pixels_bg_before + num_pixels_with_color) {
+            num_bubbles_with_holes++;
+            floodFill(image, first_pixel_with_color,
+                      Scalar(255, 0, 0));
+        } else {
+            floodFill(image, first_pixel_with_color,
+                      Scalar(rand()%51, rand()%256, rand()%256));
+        }
+
+        incrementColor(color);
+    }
+
+    namedWindow(&quot;colored&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;colored&quot;, image);
+
+    cout &lt;&lt; &quot;Number of bubbles with holes = &quot; &lt;&lt; num_bubbles_with_holes &lt;&lt; endl;
+
+    waitKey();
+    
+    return 0;
+}
+</code></pre>
+<a class="header" href="print.html#histogram-equalization" id="histogram-equalization"><h2>Histogram equalization</h2></a>
+<p>Here the histogram equalization algorithm is used with the normalized accumulated histogram to update the pixels intensity. With this algorithm, the pixel with highest intensity is going to assume the value of 255 and the others pixel also change accordingly.</p>
+<p><img src="./results/result_equalize.gif" alt="Histogram equalization" /></p>
+<a class="header" href="print.html#equalizecpp" id="equalizecpp"><h4>equalize.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+    Mat image, grey;
+    int width, height;
+    VideoCapture cap;
+
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float* histRange = {range};
+    Mat hist;
+
+    cap.open(0);
+
+    if (!cap.isOpened()){
+        cout &lt;&lt; &quot;No cameras available&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    
+    cout &lt;&lt; &quot;###### Image dimensions ######&quot; &lt;&lt; endl    
+         &lt;&lt; &quot;Width = &quot; &lt;&lt; width &lt;&lt; endl
+         &lt;&lt; &quot;Height  = &quot; &lt;&lt; height &lt;&lt; endl
+         &lt;&lt; &quot;##############################&quot; &lt;&lt; endl;
+
+    namedWindow(&quot;grey&quot;, WINDOW_NORMAL);
+    namedWindow(&quot;equalized&quot;, WINDOW_NORMAL);
+
+    while (1) {
+        cap &gt;&gt; image;
+        if(image.empty()) exit(1);
+
+        cvtColor(image, grey, CV_BGR2GRAY);
+
+        imshow(&quot;grey&quot;, grey);
+
+        calcHist(&amp;grey, 1, 0, Mat(), hist, 1, &amp;histSize, &amp;histRange);
+        
+        // Calculate accumulated histogram
+        for (int i = 1; i &lt; hist.rows; ++i) {
+            hist.at&lt;float&gt;(i) += hist.at&lt;float&gt;(i-1);
+        }
+        
+        // Normalize the accumulated histogram
+        for (int i = 0; i &lt; hist.rows; ++i) {
+            hist.at&lt;float&gt;(i) *= 255/((float)(width*height));
+        }
+
+        // Repaint the new equalized image
+        for (int i = 0; i &lt; height; i++) {
+            for (int j = 0; j &lt; width; j++) {
+                grey.at&lt;uchar&gt;(i, j) = (uchar) hist.at&lt;float&gt;(grey.at&lt;uchar&gt;(i, j));
+            }
+        }
+
+        imshow(&quot;equalized&quot;, grey);
+    
+        if(waitKey(30) &gt;= 0) break;
+    }
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#motion-detection" id="motion-detection"><h2>Motion detection</h2></a>
+<p>Motion detection can also be achieved through the use of histograms. In this example, the average intensities of consecutive histograms are compared in order to determine if there was some movement in the camera stream.</p>
+<p><img src="./results/result_motion.gif" alt="Motion detection" /></p>
+<p>This program can be run by <code>./motiondetector &lt;threshold&gt;</code>, where <code>&lt;threshold&gt;</code> is the relative difference to consider a moviment (value from 0 to 100). A delay of 1 second is put between each frame, because in case a too short interval was used, the difference between frames would be too little and the algorithm would not detect.</p>
+<p>In a surveilance system, the ideal I think would be to compare frames with a background frame (empty scene) in order to determine suspecius activity with a high frame rate.</p>
+<a class="header" href="print.html#motiondetectorcpp" id="motiondetectorcpp"><h4>motiondetector.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;thresh_motion&gt;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;Where thresh_motion is a threshold for &quot;
+             &lt;&lt; &quot;relative difference of histograms between 0 and 100.&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    float thresh_motion = atof(argv[1]);
+
+    Mat image, grey;
+    int width, height;
+    VideoCapture cap;
+
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float* histRange = {range};
+    Mat hist;
+
+    float avg = -1, prev_avg = -1;
+
+    cap.open(0);
+
+    if (!cap.isOpened()){
+        cout &lt;&lt; &quot;No cameras available&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    
+    cout &lt;&lt; &quot;###### Image dimensions ######&quot; &lt;&lt; endl    
+         &lt;&lt; &quot;Width = &quot; &lt;&lt; width &lt;&lt; endl
+         &lt;&lt; &quot;Height  = &quot; &lt;&lt; height &lt;&lt; endl
+         &lt;&lt; &quot;##############################&quot; &lt;&lt; endl;
+
+    namedWindow(&quot;grey&quot;, WINDOW_NORMAL);
+
+    while (1) {
+        cap &gt;&gt; image;
+        if(image.empty()) exit(1);
+
+        cvtColor(image, grey, CV_BGR2GRAY);
+
+        calcHist(&amp;grey, 1, 0, Mat(), hist, 1, &amp;histSize, &amp;histRange);
+
+        avg = 0;
+        for (int i = 0; i &lt; 256; ++i) {
+            avg += i * hist.at&lt;float&gt;(i) / ( (float)(width*height) );
+        }
+
+        if (prev_avg &gt; 0 &amp;&amp; // First iteration and not zero for division
+            abs(avg-prev_avg)/prev_avg &gt; thresh_motion/100.0 ) {
+
+            cout &lt;&lt; &quot;Detected movement!!&quot; &lt;&lt; endl;
+        }
+
+        prev_avg = avg;
+    
+        imshow(&quot;grey&quot;, grey);
+        
+        if(waitKey(1000) &gt;= 0) break;
+    }
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#laplacian-of-gaussian" id="laplacian-of-gaussian"><h2>Laplacian of Gaussian</h2></a>
+<p>Here is a comparation between the application of a Laplacian filter and the Laplacian of Gaussian. In order to obtain the Laplacian of Gaussian, the convolution of the two 3x3 kernels was calculated previously, which results in a 5x5 kernel. For this, a simple multiplication in Python with Scipy helped:</p>
+<pre><code class="language-python">import numpy as np
+from scipy import signal
+
+gauss = np.array([[1,2,1],[2,4,2],[1,2,1]])
+laplacian = np.array([[0,-1,0],[-1,4,-1],[0,-1,0]])
+
+signal.convolve2d(laplacian, gauss)
+
+# Result:
+# [[ 0, -1, -2, -1,  0],
+#  [-1,  0,  2,  0, -1]
+#  [-2,  2,  8,  2, -2],
+#  [-1,  0,  2,  0, -1]
+#  [ 0, -1, -2, -1,  0]]
+
+</code></pre>
+<p><img src="./results/result_laplgauss.gif" alt="Laplacian of Gaussian" /></p>
+<p>It is possible to notice that the borders now have a higher intensity, although more noise seems to show up with the Laplacian of Gaussian. It seems that due to the webcam pepper and salt noise, the gaussian filter does not help to cut it off, but rather increase its intensity.</p>
+<a class="header" href="print.html#laplgausscpp" id="laplgausscpp"><h4>laplgauss.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+void printmask(Mat &amp;m){
+    for(int i=0; i&lt;m.size().height; i++){
+        for(int j=0; j&lt;m.size().width; j++){
+            cout &lt;&lt; m.at&lt;float&gt;(i,j) &lt;&lt; &quot;,&quot;;
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+void menu(){
+    cout &lt;&lt; &quot;\npress key to activate filter: &quot; &lt;&lt; endl
+         &lt;&lt; &quot;a - absolute value&quot; &lt;&lt; endl
+         &lt;&lt; &quot;m - average&quot; &lt;&lt; endl
+         &lt;&lt; &quot;g - gauss&quot; &lt;&lt; endl
+         &lt;&lt; &quot;v - vertical&quot; &lt;&lt; endl
+         &lt;&lt; &quot;h - horizontal&quot; &lt;&lt; endl
+         &lt;&lt; &quot;l - laplacian&quot; &lt;&lt; endl
+         &lt;&lt; &quot;x - laplacian of gaussian&quot; &lt;&lt; endl
+         &lt;&lt; &quot;esc - exit&quot; &lt;&lt; endl;
+}
+
+int main(int argvc, char** argv){
+    VideoCapture video;
+    float media[] = {1,1,1,
+                     1,1,1,
+                     1,1,1};
+    
+    float gauss[] = {1,2,1,
+                     2,4,2,
+                     1,2,1};
+    
+    float horizontal[]={-1,0,1,
+                        -2,0,2,
+                        -1,0,1};
+    
+    float vertical[]={-1,-2,-1,
+                       0,0,0,
+                       1,2,1};
+    
+    float laplacian[]={0,-1,0,
+                      -1,4,-1,
+                       0,-1,0};
+
+    float laplacian_of_gaussian[] = {0,-1,-2,-1,0,
+                                     -1,0,2,0,-1,
+                                     -2,2,8,2,-2,
+                                     -1,0,2,0,-1,
+                                     0,-1,-2,-1,0};
+
+    Mat cap, frame, frame32f, frameFiltered;
+    Mat mask(3,3,CV_32F), mask1;
+    Mat result, result1;
+    double width, height, min, max;
+    int absolut;
+    char key;
+
+    video.open(0); 
+    if(!video.isOpened()) 
+        return -1;
+
+    width=video.get(CV_CAP_PROP_FRAME_WIDTH);
+    height=video.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    cout &lt;&lt; &quot;width=&quot; &lt;&lt; width &lt;&lt; &quot;\n&quot;;;
+    cout &lt;&lt; &quot;height =&quot; &lt;&lt; height&lt;&lt; &quot;\n&quot;;;
+
+    namedWindow(&quot;original&quot;, WINDOW_NORMAL);
+    namedWindow(&quot;spatialfilter&quot;, WINDOW_NORMAL);
+
+    mask = Mat(3, 3, CV_32F, media); 
+    scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+    swap(mask, mask1);
+    absolut=1; // calcs abs of the image
+
+    menu();
+    for(;;){
+        video &gt;&gt; cap; 
+        cvtColor(cap, frame, CV_BGR2GRAY);
+        flip(frame, frame, 1);
+        imshow(&quot;original&quot;, frame);
+        frame.convertTo(frame32f, CV_32F);
+        filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1,1), 0);
+        if(absolut){
+            frameFiltered=abs(frameFiltered);
+        }
+        frameFiltered.convertTo(result, CV_8U);
+        imshow(&quot;spatialfilter&quot;, result);
+        key = (char) waitKey(10);
+        if( key == 27 ) break; // esc pressed!
+        switch(key){
+            case 'a':
+                menu();
+                absolut=!absolut;
+                break;
+            case 'm':
+                menu();
+                mask = Mat(3, 3, CV_32F, media);
+                scaleAdd(mask, 1/9.0, Mat::zeros(3,3,CV_32F), mask1);
+                mask = mask1;
+                printmask(mask);
+                break;
+            case 'g':
+                menu();
+                mask = Mat(3, 3, CV_32F, gauss);
+                scaleAdd(mask, 1/16.0, Mat::zeros(3,3,CV_32F), mask1);
+                mask = mask1;
+                printmask(mask);
+                break;
+            case 'h':
+                menu();
+                mask = Mat(3, 3, CV_32F, horizontal);
+                printmask(mask);
+                break;
+            case 'v':
+                menu();
+                mask = Mat(3, 3, CV_32F, vertical);
+                printmask(mask);
+                break;
+            case 'l':
+                menu();
+                mask = Mat(3, 3, CV_32F, laplacian);
+                printmask(mask);
+                break;
+            case 'x':
+                menu();
+                mask = Mat(5, 5, CV_32F, laplacian_of_gaussian);
+                printmask(mask);
+            default:
+                break;
+        }
+    }
+    return 0;
+}
+</code></pre>
+<a class="header" href="print.html#tilt-shift" id="tilt-shift"><h2>Tilt Shift</h2></a>
+<p>Tilt shifting consists of blurring the boundaries for selective focus, often producing miniature effect. To achieve this, element-wise multiplication is done with masks of hyperbolic tangents vertically. For example,</p>
+<p><img src="./results/equation_tanh.png" alt="Equation" /></p>
+<p>and two representations of the image: focused and blurred. Afterwards, these two results are added to produce the final image, that has focus on the center and blurred at the boundaries.</p>
+<p><img src="./results/result_tiltshift.gif" alt="Tilt shift" /></p>
+<p>The parameters such start of focus, decay and center of focus are controlled using GUI elements of OpenCV. Changing these values reflect in the equation for the vertical brightness of the masks.</p>
+<p>To use this program, run <code>./tiltshift &lt;img&gt;</code>.</p>
+<a class="header" href="print.html#tiltshiftcpp" id="tiltshiftcpp"><h4>tiltshift.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+double start_focus = 20;
+int start_focus_slider = 20;
+int start_focus_slider_max = 100;
+
+double decay_strength = 100;
+int decay_strength_slider = 100;
+int decay_strength_slider_max = 100;
+
+double center_focus = 50;
+int center_focus_slider = 50;
+int center_focus_slider_max = 100;
+
+int hue_gain = 0;
+int hue_gain_slider = 0;
+int hue_gain_slider_max = 255;
+
+Mat image, temp_image, blurred_image;
+Mat func_image, compl_image;
+Mat m_image, m_bimage;
+Mat result;
+
+char TrackbarName[50];
+
+void drawFuncImage() {
+    uchar pixel_value;
+    double x;
+    double den = (decay_strength &gt; 0 ? decay_strength/10 : 0.1);
+    double func_val;
+    for (int i = 0; i &lt; func_image.rows; ++i) {
+        x = (double) i*100.0 /func_image.rows;
+        func_val =
+            ( tanh( (x-start_focus)/den ) - 
+              tanh ( ( x-(2*center_focus-start_focus) )/den ) ) / 2;
+        pixel_value = (uchar) (255*func_val);
+        for (int j = 0; j &lt; func_image.cols; ++j) {
+            func_image.at&lt;uchar&gt;(i,j) = pixel_value;
+            compl_image.at&lt;uchar&gt;(i,j) = 255 - pixel_value;
+        }
+    }
+    imshow( &quot;func_image&quot;,  func_image);
+}
+
+void composeResult() {
+    drawFuncImage();
+    
+    Mat image_f, blurred_image_f;
+    image.convertTo(image_f, CV_32F);
+    blurred_image.convertTo(blurred_image_f, CV_32F);
+
+    Mat func_image3, compl_image3;
+    
+    Mat t_func[]  = { func_image,  func_image,  func_image};
+    Mat t_compl[] = {compl_image, compl_image, compl_image};
+
+    merge( t_func, 3,  func_image3);
+    merge(t_compl, 3, compl_image3);
+
+    Mat func_image3_f, compl_image3_f;
+    func_image3.convertTo(func_image3_f, CV_32F, 1.0/255.0);
+    compl_image3.convertTo(compl_image3_f, CV_32F, 1.0/255.0);
+
+    multiply(image_f, func_image3_f, m_image);
+    multiply(blurred_image_f, compl_image3_f, m_bimage);
+
+    Mat result_f;
+
+    addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
+
+    result_f.convertTo(result, CV_8UC3);
+
+    Mat result_hsv;
+    Mat planes_hsv[3];
+    Mat hue_saturated;
+
+    cvtColor(result, result_hsv, CV_BGR2HSV);
+    split(result_hsv, planes_hsv);
+    planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+    hue_saturated.copyTo(planes_hsv[1]);
+    merge(planes_hsv, 3, result_hsv);
+    
+    cvtColor(result_hsv, result, CV_HSV2BGR);
+    imshow(&quot;result&quot;, result);
+}
+
+void on_trackbar_start_focus(int, void*) {
+    if (start_focus_slider &gt; center_focus_slider) {
+        setTrackbarPos(&quot;Start&quot;, &quot;func_image&quot;, center_focus_slider);
+        start_focus = (double) center_focus_slider;
+    } else if (2*center_focus_slider - start_focus_slider &gt; 100) {
+        setTrackbarPos(&quot;Start&quot;, &quot;func_image&quot;, 
+                       2*center_focus_slider - 100);
+        start_focus = 2*center_focus_slider - 100;
+    } else {
+        start_focus = (double) start_focus_slider;
+    }
+    start_focus = (double) start_focus_slider;
+    composeResult();
+}
+
+void on_trackbar_decay_strength(int, void*) {
+    decay_strength = (double) decay_strength_slider;
+    composeResult();
+}
+
+void on_trackbar_center_focus(int, void*) {
+    if ( center_focus_slider &lt; start_focus_slider ) {
+        setTrackbarPos(&quot;Center&quot;, &quot;func_image&quot;, start_focus_slider);
+        center_focus = (double) start_focus_slider;
+    } else if (2*center_focus_slider - start_focus_slider &gt; 100) { 
+        setTrackbarPos(&quot;Center&quot;, &quot;func_image&quot;,
+                       (100 + start_focus_slider)/2);
+        center_focus = (100 + start_focus_slider)/2;
+    } else {    
+        center_focus = (double) center_focus_slider;
+    }
+    composeResult();
+}
+
+void on_trackbar_hue_gain(int, void*) {
+    hue_gain = hue_gain_slider;
+    composeResult();
+}
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;img1&gt;&quot;
+             &lt;&lt; endl;
+        exit(1);
+    }
+
+    image = imread(argv[1]);
+    temp_image = image.clone();
+    for (int i = 0; i &lt; 100; ++i) {
+        GaussianBlur(temp_image, blurred_image, Size(3, 3), 0, 0);
+        temp_image = blurred_image.clone();
+    }
+
+    func_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+    compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+
+    namedWindow(&quot;func_image&quot;, WINDOW_NORMAL);
+    namedWindow(    &quot;result&quot;, WINDOW_NORMAL);
+
+    sprintf( TrackbarName, &quot;Start&quot; );
+    createTrackbar( TrackbarName, &quot;func_image&quot;,
+                    &amp;start_focus_slider,
+                    start_focus_slider_max,
+                    on_trackbar_start_focus );
+    on_trackbar_start_focus(start_focus_slider, 0 );
+
+
+    sprintf( TrackbarName, &quot;Decay&quot; );
+    createTrackbar( TrackbarName, &quot;func_image&quot;,
+                    &amp;decay_strength_slider,
+                    decay_strength_slider_max,
+                    on_trackbar_decay_strength );
+    on_trackbar_decay_strength(decay_strength_slider, 0);
+
+    sprintf( TrackbarName, &quot;Center&quot; );
+    createTrackbar( TrackbarName, &quot;func_image&quot;,
+                    &amp;center_focus_slider,
+                    center_focus_slider_max,
+                    on_trackbar_center_focus );
+    on_trackbar_center_focus(center_focus_slider, 0);
+
+    sprintf( TrackbarName, &quot;Hue Gain&quot; );
+    createTrackbar( TrackbarName, &quot;func_image&quot;,
+                    &amp;hue_gain_slider,
+                    hue_gain_slider_max,
+                    on_trackbar_hue_gain );
+    on_trackbar_hue_gain(hue_gain_slider, 0);
+
+
+    waitKey(0);
+
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#video-using-tilt-shift" id="video-using-tilt-shift"><h2>Video using Tilt Shift</h2></a>
+<p>This is an application of the above example, where every frame of the video is processed using tilt shift, hue saturation and also frames are discarded to create a stop motion effect. An example can be seen in <a href="https://youtu.be/Nb5tOemIDl0">https://youtu.be/Nb5tOemIDl0</a>.</p>
+<p>To run this program: <code>./tiltshiftvideo &lt;video_input&gt; &lt;video_output&gt; &lt;start_focus&gt; &lt;decay&gt; &lt;center_focus&gt; &lt;hue_offset&gt; &lt;num_frame&gt;</code>, where <code>&lt;video_output&gt;</code> must have .avi extension due to the codec used. <code>&lt;start_focus&gt;</code>, <code>&lt;decay&gt;</code> and <code>&lt;center_focus&gt;</code> can go between 0 a 100. <code>&lt;hue_gain&gt;</code> can be between 0 and 255. Every <code>&lt;num_frame&gt;</code> one frame is gotten, so if  <code>&lt;num_frame&gt;</code> is 1, the video will have the same speed as the original.</p>
+<p>To merge audio and video in the output file, I used ffmpeg to extract the track from the original clip and mix with the output video:</p>
+<pre><code>$ fmpeg -i china.mp4 -vn -acodec copy audio-china.aac 
+$ ffmpeg -i china_output_hue.avi -i audio-china.aac -codec copy -shortest china_output_hue_audio.avi
+</code></pre>
+<a class="header" href="print.html#tiltshiftvideocpp" id="tiltshiftvideocpp"><h4>tiltshiftvideo.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+double start_focus    = 20;
+double decay_strength = 50;
+double center_focus   = 50;
+int    hue_gain       = 20;
+
+Mat image, temp_image, blurred_image;
+Mat func_image, compl_image;
+Mat m_image, m_bimage;
+Mat result;
+
+int num_frame = 1;
+
+void drawFuncImage() {
+    uchar pixel_value;
+    double x;
+    double den = (decay_strength &gt; 0 ? decay_strength/10 : 0.1);
+    double func_val;
+    for (int i = 0; i &lt; func_image.rows; ++i) {
+        x = (double) i*100.0 /func_image.rows;
+        func_val =
+            ( tanh( (x-start_focus)/den ) - 
+              tanh ( ( x-(2*center_focus-start_focus) )/den ) ) / 2;
+        pixel_value = (uchar) (255*func_val);
+        for (int j = 0; j &lt; func_image.cols; ++j) {
+            func_image.at&lt;uchar&gt;(i,j) = pixel_value;
+            compl_image.at&lt;uchar&gt;(i,j) = 255 - pixel_value;
+        }
+    }
+}
+
+void composeResult() {
+    drawFuncImage();
+    
+    Mat image_f, blurred_image_f;
+    image.convertTo(image_f, CV_32F);
+    blurred_image.convertTo(blurred_image_f, CV_32F);
+
+    Mat func_image3, compl_image3;
+    
+    Mat t_func[]  = { func_image,  func_image,  func_image};
+    Mat t_compl[] = {compl_image, compl_image, compl_image};
+
+    merge( t_func, 3,  func_image3);
+    merge(t_compl, 3, compl_image3);
+
+    Mat func_image3_f, compl_image3_f;
+    func_image3.convertTo(func_image3_f, CV_32F, 1.0/255.0);
+    compl_image3.convertTo(compl_image3_f, CV_32F, 1.0/255.0);
+
+    multiply(image_f, func_image3_f, m_image);
+    multiply(blurred_image_f, compl_image3_f, m_bimage);
+
+    Mat result_f;
+
+    addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
+    result_f.convertTo(result, CV_8UC3);
+    
+    Mat result_hsv;
+    Mat planes_hsv[3];
+    Mat hue_saturated;
+
+    cvtColor(result, result_hsv, CV_BGR2HSV);
+    split(result_hsv, planes_hsv);
+    planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+    hue_saturated.copyTo(planes_hsv[1]);
+    merge(planes_hsv, 3, result_hsv);
+    
+    cvtColor(result_hsv, result, CV_HSV2BGR);
+}
+
+
+int main(int argc, char** argv) {
+    if (argc != 8) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;video_input&gt; &quot;
+             &lt;&lt; &quot;&lt;video_output&gt; &quot;
+             &lt;&lt; &quot;&lt;start_focus&gt; &lt;decay&gt; &lt;center_focus&gt; &quot; 
+             &lt;&lt; &quot;&lt;hue_gain&gt; &lt;num_frame&gt;&quot; &lt;&lt; endl &lt;&lt; endl
+             &lt;&lt; &quot;\tWhere start_focus, decay and center may be &quot;
+             &lt;&lt; &quot;between 0 and 100;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;&lt;hue_gain&gt; goes between 0 and 255;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t&lt;num_frame&gt; is the number of frames in the original to &quot;
+             &lt;&lt; &quot;the created. (stop motion effect)&quot;
+             &lt;&lt; &quot;\tAnd the output video must have an extension .avi&quot;
+             &lt;&lt; endl;
+        exit(1);
+    }
+
+    VideoCapture cap (argv[1]);
+
+    if (!cap.isOpened()){
+        cout &lt;&lt; &quot;Failed to open input file &quot; &lt;&lt; argv[1] &lt;&lt; endl;
+        exit(1);
+    }
+
+    num_frame = atoi(argv[7]);
+
+    VideoWriter wri (argv[2], CV_FOURCC('D','I','V','X'), 
+                     cap.get(CV_CAP_PROP_FPS)/num_frame,
+                     Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), 
+                          cap.get(CV_CAP_PROP_FRAME_HEIGHT)));
+    
+    if (!wri.isOpened()){
+        cout &lt;&lt; &quot;Failed to open output file &quot; &lt;&lt; argv[2] &lt;&lt; endl;
+        exit(1);
+    }
+
+
+    start_focus    = atof(argv[3]);
+    decay_strength = atof(argv[4]);
+    center_focus   = atof(argv[5]);
+    hue_gain       = atoi(argv[6]);
+
+    cap &gt;&gt; image;
+    if(image.empty()) exit(0);
+
+    func_image  = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+    compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+
+    while(1) {
+        
+        for(int i = 0; i &lt; num_frame; ++i) {
+            cap &gt;&gt; image;
+            if(image.empty()) exit(0);
+        }
+
+        temp_image = image.clone();
+        for (int i = 0; i &lt; 100; ++i) {
+            GaussianBlur(temp_image, blurred_image, Size(3, 3), 0, 0);
+            temp_image = blurred_image.clone();
+        }
+
+        composeResult();
+
+        wri &lt;&lt; result;
+    }
+
+    exit(0);
+}
+</code></pre>
+<a class="header" href="print.html#unit-2" id="unit-2"><h1>Unit 2</h1></a>
+<p>In this unit, the following examples were developed:</p>
+<ul>
+<li>Homomorphic filter</li>
+<li>Pointillism using Canny filter</li>
+</ul>
+<a class="header" href="print.html#homomorphic-filter" id="homomorphic-filter"><h2>Homomorphic filter</h2></a>
+<p>Homomorphic filters are filters that operate in the frequency domain, based on the separation of reflectance and illumance and using a modified Gaussian filter for regulating illumination in scene.</p>
+<p>The result below shows the application of a homomorphic filter, with source code displayed as well.</p>
+<p><img src="results/result_homomorphic.gif" alt="Homomorphic" /></p>
+<a class="header" href="print.html#homomorphiccpp" id="homomorphiccpp"><h4>homomorphic.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;opencv2/imgproc/imgproc.hpp&gt;
+
+#define RADIUS 100
+
+using namespace cv;
+using namespace std;
+
+float gl = 0;
+int gl_slider = 0;
+int gl_slider_max = 100;
+
+float gh = 0;
+int gh_slider = 50;
+int gh_slider_max = 100;
+
+float d0 = 0;
+int d0_slider = 50;
+int d0_slider_max = 100;
+
+float c = 0;
+int c_slider = 5;
+int c_slider_max = 100;
+
+char TrackbarName[50];
+
+Mat imaginaryInput, complexImage, multsp;
+Mat padded, filter, mag;
+Mat_&lt;float&gt; realInput, zeros;
+vector&lt;Mat&gt; planos;
+
+// valor do ruido
+float mean;
+
+// guarda tecla capturada
+char key;
+Mat image, imagegray, tmp; 
+// valores ideais dos tamanhos da imagem
+// para calculo da DFT
+int dft_M, dft_N;
+
+char *filename;
+
+// troca os quadrantes da imagem da DFT
+void deslocaDFT(Mat&amp; image ){
+    Mat tmp2, A, B, C, D;
+
+    // se a imagem tiver tamanho impar, recorta a regiao para
+    // evitar cópias de tamanho desigual
+    image = image(Rect(0, 0, image.cols &amp; -2, image.rows &amp; -2));
+    int cx = image.cols/2;
+    int cy = image.rows/2;
+
+    // reorganiza os quadrantes da transformada
+    // A B   -&gt;  D C
+    // C D       B A
+    A = image(Rect(0, 0, cx, cy));
+    B = image(Rect(cx, 0, cx, cy));
+    C = image(Rect(0, cy, cx, cy));
+    D = image(Rect(cx, cy, cx, cy));
+
+    // A &lt;-&gt; D
+    A.copyTo(tmp2);  D.copyTo(A);  tmp2.copyTo(D);
+
+    // C &lt;-&gt; B
+    C.copyTo(tmp2);  B.copyTo(C);  tmp2.copyTo(B);
+}
+
+void on_trackbar_homomorphic(int, void*) {
+    gl = (float) gl_slider / 100.0;
+    gh = (float) gh_slider / 100.0;
+    d0 = 25.0 * d0_slider / 100.0;
+    c  = (float) c_slider  / 100.0;
+
+    cout &lt;&lt; &quot;gl = &quot; &lt;&lt; gl &lt;&lt; endl;
+    cout &lt;&lt; &quot;gh = &quot; &lt;&lt; gh &lt;&lt; endl;
+    cout &lt;&lt; &quot;d0 = &quot; &lt;&lt; d0 &lt;&lt; endl;
+    cout &lt;&lt; &quot;c = &quot;  &lt;&lt; c  &lt;&lt; endl;
+
+    image = imread(filename);
+    cvtColor(image, imagegray, CV_BGR2GRAY);
+    imshow(&quot;original&quot;, imagegray);
+
+    // realiza o padding da imagem
+    copyMakeBorder(imagegray, padded, 0,
+                   dft_M - image.rows, 0,
+                   dft_N - image.cols,
+                   BORDER_CONSTANT, Scalar::all(0));
+
+    // limpa o array de matrizes que vao compor a
+    // imagem complexa
+    planos.clear();
+    // cria a compoente real
+    realInput = Mat_&lt;float&gt;(padded);
+    // insere as duas componentes no array de matrizes
+    planos.push_back(realInput);
+    planos.push_back(zeros);
+
+    // combina o array de matrizes em uma unica
+    // componente complexa
+    merge(planos, complexImage);
+
+    // calcula o dft
+    dft(complexImage, complexImage);
+
+    // realiza a troca de quadrantes
+    deslocaDFT(complexImage);
+    
+    // filtro homomorfico
+    for(int i=0; i &lt; tmp.rows; i++){
+        for(int j=0; j &lt; tmp.cols; j++){
+            float d2 = (i-dft_M/2)*(i-dft_M/2)+(j-dft_N/2)*(j-dft_N/2);
+            //cout &lt;&lt; &quot;d2 = &quot; &lt;&lt; d2 &lt;&lt; endl;
+            tmp.at&lt;float&gt; (i,j) = (gh-gl)*(1.0 - (float)exp(-(c*d2/(d0*d0)))) + gl;
+        }
+    }
+
+    // cria a matriz com as componentes do filtro e junta
+    // ambas em uma matriz multicanal complexa
+    Mat comps[]= {tmp, tmp};
+    merge(comps, 2, filter);
+    
+    // aplica o filtro frequencial
+    mulSpectrums(complexImage,filter,complexImage,0);
+
+    // troca novamente os quadrantes
+    deslocaDFT(complexImage);
+
+    // calcula a DFT inversa
+    idft(complexImage, complexImage);
+
+    // limpa o array de planos
+    planos.clear();
+
+    // separa as partes real e imaginaria da
+    // imagem filtrada
+    split(complexImage, planos);
+
+    // normaliza a parte real para exibicao
+    normalize(planos[0], planos[0], 0, 1, CV_MINMAX);
+    imshow(&quot;filtrada&quot;, planos[0]);
+
+}
+
+int main(int argc, char** argv){
+    
+    namedWindow(&quot;original&quot;, WINDOW_NORMAL);
+    namedWindow(&quot;filtrada&quot;, WINDOW_NORMAL);
+
+    if (argc != 2) {
+        cerr &lt;&lt; &quot;Usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;img_path&gt;&quot; &lt;&lt; endl;
+        return 1;
+    }
+
+    filename = argv[1];
+    image = imread(filename);
+
+    // identifica os tamanhos otimos para
+    // calculo do FFT
+    dft_M = getOptimalDFTSize(image.rows);
+    dft_N = getOptimalDFTSize(image.cols);
+
+    // realiza o padding da imagem
+    copyMakeBorder(image, padded, 0,
+                   dft_M - image.rows, 0,
+                   dft_N - image.cols,
+                   BORDER_CONSTANT, Scalar::all(0));
+
+    // parte imaginaria da matriz complexa (preenchida com zeros)
+    zeros = Mat_&lt;float&gt;::zeros(padded.size());
+
+    // prepara a matriz complexa para ser preenchida
+    complexImage = Mat(padded.size(), CV_32FC2, Scalar(0));
+
+    // a função de transferência (filtro frequencial) deve ter o
+    // mesmo tamanho e tipo da matriz complexa
+    filter = complexImage.clone();
+
+    // cria uma matriz temporária para criar as componentes real
+    // e imaginaria do filtro ideal
+    tmp = Mat(dft_M, dft_N, CV_32F);
+
+    
+    // Inicializar trackbars
+    sprintf( TrackbarName, &quot;gamma_l&quot; );
+    createTrackbar( TrackbarName, &quot;filtrada&quot;,
+                    &amp;gl_slider,
+                    gl_slider_max,
+                    on_trackbar_homomorphic );
+    
+    sprintf( TrackbarName, &quot;gamma_h&quot; );
+    createTrackbar( TrackbarName, &quot;filtrada&quot;,
+                    &amp;gh_slider,
+                    gh_slider_max,
+                    on_trackbar_homomorphic );
+    
+    sprintf( TrackbarName, &quot;d_zero&quot; );
+    createTrackbar( TrackbarName, &quot;filtrada&quot;,
+                    &amp;d0_slider,
+                    d0_slider_max,
+                    on_trackbar_homomorphic );
+    
+    sprintf( TrackbarName, &quot;c&quot; );
+    createTrackbar( TrackbarName, &quot;filtrada&quot;,
+                    &amp;c_slider,
+                    c_slider_max,
+                    on_trackbar_homomorphic );
+
+    on_trackbar_homomorphic(100, NULL);
+
+    while (1) {
+        key = (char) waitKey(10);
+        if( key == 27 ) break; // esc pressed!
+    }
+
+    return 0;
+}
+</code></pre>
+<a class="header" href="print.html#pointillism-using-canny-filter" id="pointillism-using-canny-filter"><h2>Pointillism using Canny filter</h2></a>
+<p>This exercise consists of using Canny filter to produce pontillism images. One could implement a simple pointillism algorithm with circles that have the same size. However, a more interesting painting could be to use Canny filters with varying thresholds in order to draw radius with multiple radius.</p>
+<p>The following result was produced using the algorithm as mentioned above. For every round, the minimum threshold is increased and the circle radius decreases. Also, some randomness helps as well:</p>
+<ul>
+<li>Some jitter is added to every circle painted, so the circles do not look perfectly aligned (simulating how a human would draw)</li>
+<li>The circles are not drawn in progressive order. Instead, every iteration the drawing order is shuffled so there is not perfect superposition in any direction.</li>
+</ul>
+<p><img src="./results/result_pointillism_canny.png" alt="Result of pointillism with Canny" /></p>
+<a class="header" href="print.html#pointillism_cannycpp" id="pointillism_cannycpp"><h4>pointillism_canny.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+#include &lt;ctime&gt;
+#include &lt;cstdlib&gt;
+
+using namespace std;
+using namespace cv;
+
+#define JITTER 15
+#define ROUNDS 3
+#define RADIUS 30
+
+vector&lt;int&gt; yrange;
+vector&lt;int&gt; xrange;
+
+int width, height;
+
+void init_ranges(Mat &amp;image, int step) {
+    
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+    
+    width  = image.size().width;
+    height = image.size().height;
+
+    xrange.resize(height/step);
+    yrange.resize(width/step);
+
+    iota(xrange.begin(), xrange.end(), 0); 
+    iota(yrange.begin(), yrange.end(), 0);
+
+    for (auto &amp;i : xrange) {
+        i = (i * step) + (step / 2);
+    }
+
+    for (auto &amp;j : yrange) {
+        j = (j * step) + (step / 2);
+    }
+}
+
+void initial_round(Mat &amp;image, Mat &amp;points, Mat &amp;image_color) {
+    
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+    
+    random_shuffle(xrange.begin(), xrange.end());
+    
+    for(auto i : xrange) {
+        random_shuffle(yrange.begin(), yrange.end());
+        for(auto j : yrange) {
+            int x = i+rand()%(2*JITTER)-JITTER+1;
+            int y = j+rand()%(2*JITTER)-JITTER+1;
+            Vec3b color = image_color.at&lt;Vec3b&gt;(x,y);
+            circle(points,
+                   cv::Point(y,x),
+                   RADIUS,
+                   Scalar(color),
+                   -1,
+                   CV_AA);
+        }
+    }
+}
+
+void draw_circles(Mat &amp;image, Mat &amp;points, Mat &amp;image_color, 
+                  int thresh, int radius) {
+    Mat border;
+
+    cout &lt;&lt; __func__ &lt;&lt; endl;
+
+    Canny(image, border, thresh, 3*thresh);
+
+    random_shuffle(xrange.begin(), xrange.end());
+    
+    for(auto i : xrange) {
+        random_shuffle(yrange.begin(), yrange.end());
+        for(auto j : yrange) {
+            int border_point = border.at&lt;uchar&gt;(i,j);
+            if (border_point == 255) {
+                int x = i+rand()%(2*JITTER)-JITTER+1;
+                int y = j+rand()%(2*JITTER)-JITTER+1;
+                Vec3b color = image_color.at&lt;Vec3b&gt;(x,y);
+                circle(points,
+                       cv::Point(y,x),
+                       radius,
+                       Scalar(color),
+                       -1,
+                       CV_AA);
+            }
+        }
+    }
+} 
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; image.png&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    Mat image, image_color, points;
+
+    image_color = imread(argv[1]);
+
+    cvtColor(image_color, image, CV_BGR2GRAY);
+
+    namedWindow(&quot;pontos&quot;, WINDOW_NORMAL);
+
+    srand(time(0));
+
+    if(!image.data){
+        cout &lt;&lt; &quot;Could not open&quot; &lt;&lt; argv[1] &lt;&lt; endl;
+        exit(1);
+    }
+
+    init_ranges(image, 5);
+
+    points = Mat(height, width, CV_8UC3, 
+                 Scalar(255, 255, 255));
+
+    initial_round(image, points, image_color);
+
+    for (int i = 0, thresh = 20; 
+         i &lt; ROUNDS;
+         ++i, thresh += (100 - 20)/(ROUNDS-1) ) {
+
+        init_ranges(image, ROUNDS-i); 
+        draw_circles(image, points, image_color, 
+                     thresh, 5*(ROUNDS-i));
+    }
+    
+    imshow(&quot;pontos&quot;, points);
+
+    while(1)
+        if(waitKey(10) == 27) break;
+
+    return 0;
+}
+</code></pre>
 
                 </div>
 

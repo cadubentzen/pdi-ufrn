@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Counting bubbles with holes - OpenCV exercises</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html" class="active"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">OpenCV exercises</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./unit1/bubbles.html#counting-bubbles-with-holes" id="counting-bubbles-with-holes"><h2>Counting bubbles with holes</h2></a>
+<p>This example makes use of <code>floodFill</code>, which consists of painting an area that has the same color, replacing it by another color. Here this technique is used for counting and labeling bubbles in a black and white picture. Besides that, in this algorithm, bubbles with holes are counted too.</p>
+<a class="header" href="./unit1/bubbles.html#original-image" id="original-image"><h4>Original image</h4></a>
+<p><img src="./results/result_bubbles_original.png" alt="Original" /></p>
+<a class="header" href="./unit1/bubbles.html#no-boundaries" id="no-boundaries"><h4>No boundaries</h4></a>
+<p><img src="./results/result_bubbles_noboundaries.png" alt="No boundaries" /></p>
+<a class="header" href="./unit1/bubbles.html#labeled" id="labeled"><h4>Labeled</h4></a>
+<p><img src="./results/result_bubbles_colored.png" alt="Labeled" /></p>
+<p>To run the program: <code>./bubbles &lt;bubbles_img&gt;</code>. An example is illustrated above with an example as input. First we remove the bubbles that are in the boundaries because we can't know for sure that they have holes or not (in case this picture was taken from real objects), then we paint the bubbles and bubbles with holes are paint as blue (in RGB: 0, 0, 255).</p>
+<p>One important aspect of the algorith below is that it runs on a BGR image, not greyscale. This is done to overcome the problem of having a limit of 255 bubbles on counting if the same thing was done in greyscale. In this implementation I allowed from BGR = (0,0,1) up until BGR = (50,255,255) for labeling. This way it is possible to count up to 3276799 bubbles. The blue channel was limited to 50 for allowing bubbles with holes to be painted full blue BGR = (255,0,0) and be distinguished from the others.</p>
+<a class="header" href="./unit1/bubbles.html#bubblescpp" id="bubblescpp"><h4>bubbles.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+inline void incrementColor(Vec3b &amp;color) {
+    if (color[2] &lt; 255) {
+        color[2]++;
+    } else if (color[1] &lt; 255) {
+        color[1]++;
+        color[2] = 0;
+    } else if (color[0] &lt; 50) {
+        color[0]++;
+        color[1] = 0;
+        color[2] = 0;
+    } else {
+        cout &lt;&lt; &quot;Max of bubbles for this algorithm is 3276799.&quot; &lt;&lt; endl;
+        exit(1);
+    }
+}
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        cout &lt;&lt; &quot;usage:&quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;bubbles_image&gt;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t where &lt;bubbles_image&gt; should be a black &quot;
+             &lt;&lt; &quot;and white image of bubbles&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    Mat image;
+
+    image = imread(argv[1]);
+    if(!image.data) {
+        cout &lt;&lt; &quot;failed to open bolhas.png&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    namedWindow(&quot;Original&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;Original&quot;, image);
+
+    Size imgSize = image.size();
+    Vec3b white;
+    white[0] = 255; white[1] = 255; white[2] = 255;
+
+    // First remove the bubbles in boundaries
+
+    // Loop through first and last line
+    for(int i = 0; i &lt; imgSize.width; ++i) {
+        // First line
+        if (image.at&lt;Vec3b&gt;(0, i) == white) {
+            floodFill(image, Point(i, 0), Scalar(0, 0, 0));
+        }
+        // Last line
+        if (image.at&lt;Vec3b&gt;(imgSize.height-1, i) == white) {
+            floodFill(image, Point(i, imgSize.height-1), Scalar(0, 0, 0));
+        }
+    }
+
+    // Loop through first and last column
+    for(int i = 0; i &lt; imgSize.height; ++i) {
+        // First column
+        if (image.at&lt;Vec3b&gt;(i, 0) == white) {
+            floodFill(image, Point(0, i), Scalar(0, 0, 0));
+        }
+        // Last column
+        if (image.at&lt;Vec3b&gt;(i, imgSize.width-1) == white) {
+            floodFill(image, Point(imgSize.width-1, i), Scalar(0, 0, 0));
+        }
+    }
+
+    namedWindow(&quot;noBoundaries&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;noBoundaries&quot;, image);  
+    
+    // Then first count bubbles with holes or not
+    unsigned num_bubbles = 0;
+    // Initial count color is [0,0,1]
+    Vec3b color;
+    color[0] = 0; color[1] = 0; color[2] = 1;
+
+    for (int i = 0; i &lt; imgSize.height; ++i) {
+        for (int j = 0; j &lt; imgSize.width; ++j) {
+            if (image.at&lt;Vec3b&gt;(i, j) == white) {
+                floodFill(image, Point(j, i), 
+                          Scalar(color[0], color[1], color[2]));
+                num_bubbles++;
+                incrementColor(color);
+            }
+        }
+    }
+
+    cout &lt;&lt; &quot;Number of bubbles = &quot; &lt;&lt; num_bubbles &lt;&lt; endl;
+
+    // Now count bubbles with holes
+    
+    unsigned num_bubbles_with_holes = 0;
+    Mat image_aux = image.clone();
+
+    color[0] = 0; color[1] = 0; color[2] = 1;
+
+    for (int i = 0; i &lt; num_bubbles; ++i) {
+        unsigned num_pixels_bg_before = 
+            floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+        
+        Point first_pixel_with_color (0, 0);
+
+        for (int i2 = 0; i2 &lt; imgSize.height; ++i2) {
+            for (int j = 0; j &lt; imgSize.width; ++j) {
+                if (image_aux.at&lt;Vec3b&gt;(i2, j) == color) {
+                    first_pixel_with_color = Point(j, i2);
+                    break;
+                }
+            }
+        }
+        if (first_pixel_with_color.x == 0 &amp;&amp;
+            first_pixel_with_color.y == 0) {
+            cerr &lt;&lt; &quot;No pixel with this color found. Review algorithm.&quot; &lt;&lt; endl;
+            exit(1);
+        }
+
+        unsigned num_pixels_with_color = 
+            floodFill(image_aux, first_pixel_with_color, 
+                                 Scalar(0, 0, 0));
+
+        unsigned num_pixels_bg_after = 
+            floodFill(image_aux, Point(0, 0), Scalar(0, 0, 0));
+
+        if (num_pixels_bg_after &gt; num_pixels_bg_before + num_pixels_with_color) {
+            num_bubbles_with_holes++;
+            floodFill(image, first_pixel_with_color,
+                      Scalar(255, 0, 0));
+        } else {
+            floodFill(image, first_pixel_with_color,
+                      Scalar(rand()%51, rand()%256, rand()%256));
+        }
+
+        incrementColor(color);
+    }
+
+    namedWindow(&quot;colored&quot;, WINDOW_AUTOSIZE);
+    imshow(&quot;colored&quot;, image);
+
+    cout &lt;&lt; &quot;Number of bubbles with holes = &quot; &lt;&lt; num_bubbles_with_holes &lt;&lt; endl;
+
+    waitKey();
+    
+    return 0;
+}
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./unit1/swapping.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./unit1/histogram.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./unit1/swapping.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./unit1/histogram.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Tilt shift of a video - OpenCV exercises</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="OpenCV exercises from Digital Image Processing course">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./introduction.html"><strong>1.</strong> Introduction</a></li><li><a href="./unit1/list.html"><strong>2.</strong> Unit 1</a></li><li><ul class="section"><li><a href="./unit1/negative.html"><strong>2.1.</strong> Negative of a region</a></li><li><a href="./unit1/swapping.html"><strong>2.2.</strong> Swapping regions</a></li><li><a href="./unit1/bubbles.html"><strong>2.3.</strong> Counting bubbles with holes</a></li><li><a href="./unit1/histogram.html"><strong>2.4.</strong> Histogram equalization</a></li><li><a href="./unit1/motion.html"><strong>2.5.</strong> Motion detection</a></li><li><a href="./unit1/laplgauss.html"><strong>2.6.</strong> Laplacian of Gaussian</a></li><li><a href="./unit1/tiltshift.html"><strong>2.7.</strong> Tilt shift</a></li><li><a href="./unit1/tiltshiftvideo.html" class="active"><strong>2.8.</strong> Tilt shift of a video</a></li></ul></li><li><a href="./unit2/list.html"><strong>3.</strong> Unit 2</a></li><li><ul class="section"><li><a href="./unit2/homomorphic.html"><strong>3.1.</strong> Homomorphic filter</a></li><li><a href="./unit2/pointillism.html"><strong>3.2.</strong> Pointillism using Canny filter</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">OpenCV exercises</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="./unit1/tiltshiftvideo.html#video-using-tilt-shift" id="video-using-tilt-shift"><h2>Video using Tilt Shift</h2></a>
+<p>This is an application of the above example, where every frame of the video is processed using tilt shift, hue saturation and also frames are discarded to create a stop motion effect. An example can be seen in <a href="https://youtu.be/Nb5tOemIDl0">https://youtu.be/Nb5tOemIDl0</a>.</p>
+<p>To run this program: <code>./tiltshiftvideo &lt;video_input&gt; &lt;video_output&gt; &lt;start_focus&gt; &lt;decay&gt; &lt;center_focus&gt; &lt;hue_offset&gt; &lt;num_frame&gt;</code>, where <code>&lt;video_output&gt;</code> must have .avi extension due to the codec used. <code>&lt;start_focus&gt;</code>, <code>&lt;decay&gt;</code> and <code>&lt;center_focus&gt;</code> can go between 0 a 100. <code>&lt;hue_gain&gt;</code> can be between 0 and 255. Every <code>&lt;num_frame&gt;</code> one frame is gotten, so if  <code>&lt;num_frame&gt;</code> is 1, the video will have the same speed as the original.</p>
+<p>To merge audio and video in the output file, I used ffmpeg to extract the track from the original clip and mix with the output video:</p>
+<pre><code>$ fmpeg -i china.mp4 -vn -acodec copy audio-china.aac 
+$ ffmpeg -i china_output_hue.avi -i audio-china.aac -codec copy -shortest china_output_hue_audio.avi
+</code></pre>
+<a class="header" href="./unit1/tiltshiftvideo.html#tiltshiftvideocpp" id="tiltshiftvideocpp"><h4>tiltshiftvideo.cpp</h4></a>
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+double start_focus    = 20;
+double decay_strength = 50;
+double center_focus   = 50;
+int    hue_gain       = 20;
+
+Mat image, temp_image, blurred_image;
+Mat func_image, compl_image;
+Mat m_image, m_bimage;
+Mat result;
+
+int num_frame = 1;
+
+void drawFuncImage() {
+    uchar pixel_value;
+    double x;
+    double den = (decay_strength &gt; 0 ? decay_strength/10 : 0.1);
+    double func_val;
+    for (int i = 0; i &lt; func_image.rows; ++i) {
+        x = (double) i*100.0 /func_image.rows;
+        func_val =
+            ( tanh( (x-start_focus)/den ) - 
+              tanh ( ( x-(2*center_focus-start_focus) )/den ) ) / 2;
+        pixel_value = (uchar) (255*func_val);
+        for (int j = 0; j &lt; func_image.cols; ++j) {
+            func_image.at&lt;uchar&gt;(i,j) = pixel_value;
+            compl_image.at&lt;uchar&gt;(i,j) = 255 - pixel_value;
+        }
+    }
+}
+
+void composeResult() {
+    drawFuncImage();
+    
+    Mat image_f, blurred_image_f;
+    image.convertTo(image_f, CV_32F);
+    blurred_image.convertTo(blurred_image_f, CV_32F);
+
+    Mat func_image3, compl_image3;
+    
+    Mat t_func[]  = { func_image,  func_image,  func_image};
+    Mat t_compl[] = {compl_image, compl_image, compl_image};
+
+    merge( t_func, 3,  func_image3);
+    merge(t_compl, 3, compl_image3);
+
+    Mat func_image3_f, compl_image3_f;
+    func_image3.convertTo(func_image3_f, CV_32F, 1.0/255.0);
+    compl_image3.convertTo(compl_image3_f, CV_32F, 1.0/255.0);
+
+    multiply(image_f, func_image3_f, m_image);
+    multiply(blurred_image_f, compl_image3_f, m_bimage);
+
+    Mat result_f;
+
+    addWeighted(m_image, 1, m_bimage, 1, 0, result_f);
+    result_f.convertTo(result, CV_8UC3);
+    
+    Mat result_hsv;
+    Mat planes_hsv[3];
+    Mat hue_saturated;
+
+    cvtColor(result, result_hsv, CV_BGR2HSV);
+    split(result_hsv, planes_hsv);
+    planes_hsv[1].convertTo(hue_saturated, -1, 1, hue_gain);
+    hue_saturated.copyTo(planes_hsv[1]);
+    merge(planes_hsv, 3, result_hsv);
+    
+    cvtColor(result_hsv, result, CV_HSV2BGR);
+}
+
+
+int main(int argc, char** argv) {
+    if (argc != 8) {
+        cout &lt;&lt; &quot;usage: &quot; &lt;&lt; argv[0] &lt;&lt; &quot; &lt;video_input&gt; &quot;
+             &lt;&lt; &quot;&lt;video_output&gt; &quot;
+             &lt;&lt; &quot;&lt;start_focus&gt; &lt;decay&gt; &lt;center_focus&gt; &quot; 
+             &lt;&lt; &quot;&lt;hue_gain&gt; &lt;num_frame&gt;&quot; &lt;&lt; endl &lt;&lt; endl
+             &lt;&lt; &quot;\tWhere start_focus, decay and center may be &quot;
+             &lt;&lt; &quot;between 0 and 100;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;&lt;hue_gain&gt; goes between 0 and 255;&quot; &lt;&lt; endl
+             &lt;&lt; &quot;\t&lt;num_frame&gt; is the number of frames in the original to &quot;
+             &lt;&lt; &quot;the created. (stop motion effect)&quot;
+             &lt;&lt; &quot;\tAnd the output video must have an extension .avi&quot;
+             &lt;&lt; endl;
+        exit(1);
+    }
+
+    VideoCapture cap (argv[1]);
+
+    if (!cap.isOpened()){
+        cout &lt;&lt; &quot;Failed to open input file &quot; &lt;&lt; argv[1] &lt;&lt; endl;
+        exit(1);
+    }
+
+    num_frame = atoi(argv[7]);
+
+    VideoWriter wri (argv[2], CV_FOURCC('D','I','V','X'), 
+                     cap.get(CV_CAP_PROP_FPS)/num_frame,
+                     Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), 
+                          cap.get(CV_CAP_PROP_FRAME_HEIGHT)));
+    
+    if (!wri.isOpened()){
+        cout &lt;&lt; &quot;Failed to open output file &quot; &lt;&lt; argv[2] &lt;&lt; endl;
+        exit(1);
+    }
+
+
+    start_focus    = atof(argv[3]);
+    decay_strength = atof(argv[4]);
+    center_focus   = atof(argv[5]);
+    hue_gain       = atoi(argv[6]);
+
+    cap &gt;&gt; image;
+    if(image.empty()) exit(0);
+
+    func_image  = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+    compl_image = Mat(image.rows, image.cols, CV_8UC1, Scalar(255));
+
+    while(1) {
+        
+        for(int i = 0; i &lt; num_frame; ++i) {
+            cap &gt;&gt; image;
+            if(image.empty()) exit(0);
+        }
+
+        temp_image = image.clone();
+        for (int i = 0; i &lt; 100; ++i) {
+            GaussianBlur(temp_image, blurred_image, Size(3, 3), 0, 0);
+            temp_image = blurred_image.clone();
+        }
+
+        composeResult();
+
+        wri &lt;&lt; result;
+    }
+
+    exit(0);
+}
+</code></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./unit1/tiltshift.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./unit2/list.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./unit1/tiltshift.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./unit2/list.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>
