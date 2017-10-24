@@ -1,11 +1,4 @@
 !.gitignore
 
-book/
-
 *.swp
-*.out
 .DS_Store
-
-*.avi
-*.mp4
-*.aac
