@@ -1,4 +1,6 @@
 !.gitignore
 
+book/
+
 *.swp
 .DS_Store
